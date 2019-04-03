@@ -31,6 +31,7 @@ import com.android.launcher3.util.FlingAnimation;
 
 /**
  * Utility class to manage fling to delete action during drag and drop.
+ * 用于管理拖动以在拖放期间删除操作的实用程序类。
  */
 public class FlingToDeleteHelper {
 
@@ -40,6 +41,7 @@ public class FlingToDeleteHelper {
     private final int mFlingToDeleteThresholdVelocity;
 
     private ButtonDropTarget mDropTarget;
+    //滑动速度跟踪器;这个类可以用来监听手指移动改变的速度;
     private VelocityTracker mVelocityTracker;
 
     public FlingToDeleteHelper(Launcher launcher) {
@@ -101,6 +103,7 @@ public class FlingToDeleteHelper {
 
     /**
      * Determines whether the user flung the current item to delete it.
+     * 确定用户是否抛出当前项目以将其删除。
      *
      * @return the vector at which the item was flung, or null if no fling was detected.
      */
@@ -109,7 +112,9 @@ public class FlingToDeleteHelper {
             mDropTarget = (ButtonDropTarget) mLauncher.findViewById(R.id.delete_target_text);
         }
         if (mDropTarget == null || !mDropTarget.isDropEnabled()) return null;
+        //包含UI中用于超时，大小和距离的标准常量的方法。
         ViewConfiguration config = ViewConfiguration.get(mLauncher);
+        //计算当前速度
         mVelocityTracker.computeCurrentVelocity(1000, config.getScaledMaximumFlingVelocity());
         PointF vel = new PointF(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
         float theta = MAX_FLING_DEGREES + 1;

@@ -24,6 +24,7 @@ import com.android.launcher3.Utilities;
 
 /**
  * Base class for driving a drag/drop operation.
+ * 用于驱动拖放操作的基类。
  */
 public abstract class DragDriver {
     protected final EventListener mEventListener;

@@ -18,6 +18,7 @@ import com.android.launcher3.anim.Interpolators;
 
 /**
  * Utility class to handle wallpaper scrolling along with workspace.
+ * 用于处理壁纸滚动以及工作区的实用程序类。
  */
 public class WallpaperOffsetInterpolator extends BroadcastReceiver {
 

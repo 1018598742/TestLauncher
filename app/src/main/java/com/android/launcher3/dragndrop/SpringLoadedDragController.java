@@ -52,6 +52,12 @@ public class SpringLoadedDragController implements OnAlarmListener {
     }
 
     // this is called when our timer runs out
+
+    /**
+     * 当我们的计时器用完时调用它
+     * @param alarm
+     */
+    @Override
     public void onAlarm(Alarm alarm) {
         if (mScreen != null) {
             // Snap to the screen that we are hovering over now

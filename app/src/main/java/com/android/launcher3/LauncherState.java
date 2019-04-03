@@ -125,6 +125,7 @@ public class LauncherState {
 
     /**
      * True if the state allows workspace icons to be dragged.
+     * 如果状态允许拖动工作区图标，则为True
      */
     public final boolean workspaceIconsCanBeDragged;
 

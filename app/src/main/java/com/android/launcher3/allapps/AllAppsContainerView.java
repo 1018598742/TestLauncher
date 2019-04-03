@@ -223,6 +223,7 @@ public class AllAppsContainerView extends SpringRelativeLayout implements DragSo
 
     /**
      * Resets the state of AllApps.
+     * 重置AllApps的状态。
      */
     public void reset(boolean animate) {
         for (int i = 0; i < mAH.length; i++) {

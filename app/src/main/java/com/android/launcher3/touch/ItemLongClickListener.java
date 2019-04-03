@@ -37,6 +37,7 @@ import com.android.launcher3.folder.Folder;
 
 /**
  * Class to handle long-clicks on workspace items and start drag as a result.
+ * 用于处理工作区项目的长按并开始拖动的类。
  */
 public class ItemLongClickListener {
 

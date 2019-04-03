@@ -25,6 +25,7 @@ import android.view.View;
 
 /**
  * Manages the opening and closing app transitions from Launcher.
+ * 管理来自Launcher的打开和关闭应用程序转换。
  */
 public class LauncherAppTransitionManager {
 

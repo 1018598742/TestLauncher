@@ -43,6 +43,7 @@ import java.util.Map;
 
 /**
  * Provides data for the popup menu that appears after long-clicking on apps.
+ * 为长按应用程序后显示的弹出菜单提供数据。
  */
 public class PopupDataProvider implements NotificationListener.NotificationsChangedListener {
 

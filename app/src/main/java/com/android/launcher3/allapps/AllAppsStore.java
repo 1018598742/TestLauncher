@@ -33,6 +33,7 @@ import java.util.Set;
 
 /**
  * A utility class to maintain the collection of all apps.
+ * 用于维护所有应用程序集合的实用程序类。
  */
 public class AllAppsStore {
 

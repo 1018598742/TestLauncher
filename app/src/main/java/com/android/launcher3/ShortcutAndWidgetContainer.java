@@ -28,6 +28,9 @@ import android.view.ViewGroup;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 
+/**
+ * 快捷方式和小部件的容器
+ */
 public class ShortcutAndWidgetContainer extends ViewGroup {
     static final String TAG = "ShortcutAndWidgetContainer";
 

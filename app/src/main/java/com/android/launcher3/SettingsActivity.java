@@ -52,6 +52,7 @@ import java.util.Objects;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
+ * 主屏幕设置
  */
 public class SettingsActivity extends Activity {
 

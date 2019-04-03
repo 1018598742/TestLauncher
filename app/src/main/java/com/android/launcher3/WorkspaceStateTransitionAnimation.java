@@ -39,6 +39,7 @@ import com.android.launcher3.graphics.WorkspaceAndHotseatScrim;
 
 /**
  * Manages the animations between each of the workspace states.
+ * 管理每个工作空间状态之间的动画。
  */
 public class WorkspaceStateTransitionAnimation {
 

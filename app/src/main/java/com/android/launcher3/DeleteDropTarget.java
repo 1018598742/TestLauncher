@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.logging.LoggerUtils;
@@ -84,8 +85,20 @@ public class DeleteDropTarget extends ButtonDropTarget {
             mText = getResources().getString(item.id != ItemInfo.NO_ID
                     ? R.string.remove_drop_target_label
                     : android.R.string.cancel);
+            //yy add
+            if(FeatureFlags.REMOVE_DRAWER){
+                mText = getResources().getString(isCanDrop(item)
+                        ? R.string.remove_drop_target_label
+                        : android.R.string.cancel);
+            }
+            //end yy add
             requestLayout();
         }
+    }
+
+    private boolean isCanDrop(ItemInfo item){
+        return !(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+                item.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER);
     }
 
     /**
@@ -94,6 +107,12 @@ public class DeleteDropTarget extends ButtonDropTarget {
     private void setControlTypeBasedOnDragSource(ItemInfo item) {
         mControlType = item.id != ItemInfo.NO_ID ? ControlType.REMOVE_TARGET
                 : ControlType.CANCEL_TARGET;
+        //yy add
+        if(FeatureFlags.REMOVE_DRAWER) {
+            mControlType = isCanDrop(item) ? ControlType.REMOVE_TARGET
+                    : ControlType.CANCEL_TARGET;
+        }
+        //end yy add
     }
 
     @Override
@@ -112,10 +131,15 @@ public class DeleteDropTarget extends ButtonDropTarget {
         // Remove the item from launcher and the db, we can ignore the containerInfo in this call
         // because we already remove the drag view from the folder (if the drag originated from
         // a folder) in Folder.beginDrag()
-        mLauncher.removeItem(view, item, true /* deleteFromDb */);
-        mLauncher.getWorkspace().stripEmptyScreens();
-        mLauncher.getDragLayer()
-                .announceForAccessibility(getContext().getString(R.string.item_removed));
+        // add by yy ,cancel to remove app icon and folder
+        if(!FeatureFlags.REMOVE_DRAWER || isCanDrop(item)) {
+            mLauncher.removeItem(view, item, true /* deleteFromDb */);
+            mLauncher.getWorkspace().stripEmptyScreens();
+            mLauncher.getDragLayer()
+                    .announceForAccessibility(getContext().getString(R.string.item_removed));
+        }
+        // end add by yy
+
     }
 
     @Override

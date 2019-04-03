@@ -801,8 +801,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         // Refresh shortcuts if the permission changed.
         mModel.refreshShortcutsIfRequired();
-
-        DiscoveryBounce.showForHomeIfNeeded(this);
+        //Add by yy
+        if(!FeatureFlags.REMOVE_DRAWER)
+            DiscoveryBounce.showForHomeIfNeeded(this);
+        //end add by yy
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onResume();
         }

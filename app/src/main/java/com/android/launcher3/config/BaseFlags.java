@@ -28,6 +28,8 @@ abstract class BaseFlags {
 
     BaseFlags() {}
 
+    public static final boolean REMOVE_DRAWER = true;
+
     // TODO: 2019/4/3
     public static final boolean IS_DOGFOOD_BUILD = true;
     public static final String AUTHORITY = "com.android.launcher3.settings".intern();

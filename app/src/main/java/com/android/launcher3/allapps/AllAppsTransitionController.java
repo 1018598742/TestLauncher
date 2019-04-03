@@ -1,18 +1,5 @@
 package com.android.launcher3.allapps;
 
-import static com.android.launcher3.LauncherState.ALL_APPS_CONTENT;
-import static com.android.launcher3.LauncherState.ALL_APPS_HEADER;
-import static com.android.launcher3.LauncherState.ALL_APPS_HEADER_EXTRA;
-import static com.android.launcher3.LauncherState.OVERVIEW;
-import static com.android.launcher3.LauncherState.VERTICAL_SWIPE_INDICATOR;
-import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_ALL_APPS_FADE;
-import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_OVERVIEW_SCALE;
-import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_VERTICAL_PROGRESS;
-import static com.android.launcher3.anim.Interpolators.FAST_OUT_SLOW_IN;
-import static com.android.launcher3.anim.Interpolators.LINEAR;
-import static com.android.launcher3.anim.PropertySetter.NO_ANIM_PROPERTY_SETTER;
-import static com.android.launcher3.util.SystemUiController.UI_STATE_ALL_APPS;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -30,14 +17,29 @@ import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorSetBuilder;
 import com.android.launcher3.anim.PropertySetter;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ScrimView;
+
+import static com.android.launcher3.LauncherState.ALL_APPS_CONTENT;
+import static com.android.launcher3.LauncherState.ALL_APPS_HEADER;
+import static com.android.launcher3.LauncherState.ALL_APPS_HEADER_EXTRA;
+import static com.android.launcher3.LauncherState.OVERVIEW;
+import static com.android.launcher3.LauncherState.VERTICAL_SWIPE_INDICATOR;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_ALL_APPS_FADE;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_OVERVIEW_SCALE;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_VERTICAL_PROGRESS;
+import static com.android.launcher3.anim.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.launcher3.anim.Interpolators.LINEAR;
+import static com.android.launcher3.anim.PropertySetter.NO_ANIM_PROPERTY_SETTER;
+import static com.android.launcher3.util.SystemUiController.UI_STATE_ALL_APPS;
 
 /**
  * Handles AllApps view transition.
  * 1) Slides all apps view using direct manipulation
  * 2) When finger is released, animate to either top or bottom accordingly.
  * <p/>
+ * 处理AllApps视图转换。 * 1）使用直接操作滑动所有应用视图* 2）释放手指时，相应地设置为顶部或底部的动画。
  * Algorithm:
  * If release velocity > THRES1, snap according to the direction of movement.
  * If release velocity < THRES1, snap according to either top or bottom depending on whether it's
@@ -48,16 +50,16 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
     public static final Property<AllAppsTransitionController, Float> ALL_APPS_PROGRESS =
             new Property<AllAppsTransitionController, Float>(Float.class, "allAppsProgress") {
 
-        @Override
-        public Float get(AllAppsTransitionController controller) {
-            return controller.mProgress;
-        }
+                @Override
+                public Float get(AllAppsTransitionController controller) {
+                    return controller.mProgress;
+                }
 
-        @Override
-        public void set(AllAppsTransitionController controller, Float progress) {
-            controller.setProgress(progress);
-        }
-    };
+                @Override
+                public void set(AllAppsTransitionController controller, Float progress) {
+                    controller.setProgress(progress);
+                }
+            };
 
     private AllAppsContainerView mAppsView;
     private ScrimView mScrimView;
@@ -113,7 +115,6 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
      * in xml-based animations which also handle updating the appropriate UI.
      *
      * @param progress value between 0 and 1, 0 shows all apps and 1 shows workspace
-     *
      * @see #setState(LauncherState)
      * @see #setStateWithAnimation(LauncherState, AnimatorSetBuilder, AnimationConfig)
      */
@@ -148,6 +149,7 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
     /**
      * Sets the vertical transition progress to {@param state} and updates all the dependent UI
      * accordingly.
+     * 将垂直转换进度设置为{@param state}并相应地更新所有相关UI *。
      */
     @Override
     public void setState(LauncherState state) {
@@ -159,10 +161,13 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
     /**
      * Creates an animation which updates the vertical transition progress and updates all the
      * dependent UI using various animation events
+     * 创建动画，该动画更新垂直转换进度并使用各种动画事件更新所有*依赖UI
      */
     @Override
     public void setStateWithAnimation(LauncherState toState,
-            AnimatorSetBuilder builder, AnimationConfig config) {
+                                      AnimatorSetBuilder builder, AnimationConfig config) {
+        if (FeatureFlags.REMOVE_DRAWER)
+            return;
         float targetProgress = toState.getVerticalProgress(mLauncher);
         if (Float.compare(mProgress, targetProgress) == 0) {
             setAlphas(toState, config, builder);
@@ -191,7 +196,7 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
     }
 
     private void setAlphas(LauncherState toState, AnimationConfig config,
-            AnimatorSetBuilder builder) {
+                           AnimatorSetBuilder builder) {
         PropertySetter setter = config == null ? NO_ANIM_PROPERTY_SETTER
                 : config.getPropertySetter(builder);
         int visibleElements = toState.getVisibleElements(mLauncher);

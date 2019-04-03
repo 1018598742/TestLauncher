@@ -9,12 +9,14 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherStateManager.AnimationComponents;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.touch.AbstractStateChangeTouchController;
 import com.android.launcher3.touch.SwipeDetector;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 
 /**
  * TouchController to switch between NORMAL and ALL_APPS state.
+ * TouchController在NORMAL和ALL_APPS状态之间切换
  */
 public class AllAppsSwipeController extends AbstractStateChangeTouchController {
 
@@ -43,6 +45,11 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
         if (mLauncher.isInState(ALL_APPS) && !mLauncher.getAppsView().shouldContainerScroll(ev)) {
             return false;
         }
+        //add by yy
+        if(FeatureFlags.REMOVE_DRAWER){
+            return false;
+        }
+        //end add by yy
         return true;
     }
 

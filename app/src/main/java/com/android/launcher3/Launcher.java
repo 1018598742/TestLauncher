@@ -288,6 +288,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         mAccessibilityDelegate = new LauncherAccessibilityDelegate(this);
         //初始化拖拽管理器
         mDragController = new DragController(this);
+        //初始化workspace和菜单切换
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new LauncherStateManager(this);
         UiFactory.onCreate(this);

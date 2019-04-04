@@ -1865,7 +1865,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
      * Bind the items start-end from the list.
      * <p>
      * Implementation of the method from LauncherModel.Callbacks.
+     * 绑定工作区域的数据
      */
+    // TODO: 2019/4/4 绑定工作区域的数据
     @Override
     public void bindItems(final List<ItemInfo> items, final boolean forceAnimateIcons) {
         // Get the list of added items and intersect them with the set of items here
@@ -1886,21 +1888,21 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
             final View view;
             switch (item.itemType) {
-                case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
-                case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-                case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
+                case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION://0
+                case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT://1
+                case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {//6
                     ShortcutInfo info = (ShortcutInfo) item;
                     view = createShortcut(info);
                     break;
                 }
-                case LauncherSettings.Favorites.ITEM_TYPE_FOLDER: {
+                case LauncherSettings.Favorites.ITEM_TYPE_FOLDER: {//2
                     view = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
                             (FolderInfo) item);
                     break;
                 }
-                case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
-                case LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET: {
+                case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET://4
+                case LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET: {//5
                     view = inflateAppWidget((LauncherAppWidgetInfo) item);
                     if (view == null) {
                         continue;
@@ -1913,6 +1915,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
             /*
              * Remove colliding items.
+             * 移除占位重复条目
              */
             if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
                 CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
@@ -1930,6 +1933,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     }
                 }
             }
+            //工作空间绑定条目
             workspace.addInScreenFromBind(view, item);
             if (animateIcons) {
                 // Animate all the applications up now
@@ -1940,6 +1944,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 newItemsScreenId = item.screenId;
             }
         }
+        //循环结束
 
         if (animateIcons) {
             // Animate to the correct page
@@ -1971,6 +1976,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                 }
             }
         }
+        //工作区域刷新布局
         workspace.requestLayout();
     }
 

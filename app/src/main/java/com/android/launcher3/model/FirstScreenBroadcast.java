@@ -25,6 +25,7 @@ import com.android.launcher3.FolderInfo;
 import com.android.launcher3.ItemInfo;
 import com.android.launcher3.LauncherAppWidgetInfo;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.util.MultiHashMap;
 
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ import java.util.Set;
  */
 public class FirstScreenBroadcast {
 
-    private static final String TAG = "FirstScreenBroadcast";
+//    private static final String TAG = "FirstScreenBroadcast";
+    private static final String TAG = TagConfig.TAG;
     private static final boolean DEBUG = false;
 
     private static final String ACTION_FIRST_SCREEN_ACTIVE_INSTALLS
@@ -81,10 +83,15 @@ public class FirstScreenBroadcast {
     /**
      * Sends a broadcast to all package installers that have items with active sessions on the users
      * first screen.
+     * 将广播发送到在用户*第一个屏幕上具有包含活动会话的项目的所有包安装程序。
      */
     public void sendBroadcasts(Context context, List<ItemInfo> firstScreenItems) {
+        //mPackagesForInstaller 在 LoaderTask&loadWorkspace 中已经被赋值
         for (Map.Entry<String, ArrayList<String>> entry : mPackagesForInstaller.entrySet()) {
-            sendBroadcastToInstaller(context, entry.getKey(), entry.getValue(), firstScreenItems);
+            String key = entry.getKey();
+            ArrayList<String> value = entry.getValue();
+            Log.i(TAG, "FirstScreenBroadcast-sendBroadcasts: key="+key+"=value="+value.toString());
+            sendBroadcastToInstaller(context, key, value, firstScreenItems);
         }
     }
 

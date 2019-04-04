@@ -193,6 +193,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         sp.edit().putStringSet(APPS_PENDING_INSTALL, newStrings).apply();
     }
 
+    @Override
     public void onReceive(Context context, Intent data) {
         if (!ACTION_INSTALL_SHORTCUT.equals(data.getAction())) {
             return;
@@ -292,9 +293,15 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
     }
 
     public static void enableInstallQueue(int flag) {
+        //位或运算符（|）
+        //运算规则：两个数都转为二进制，然后从高位开始比较，两个数只要有一个为1则为1，否则就为0。
         sInstallQueueDisabledFlags |= flag;
     }
     public static void disableAndFlushInstallQueue(int flag, Context context) {
+        //位与运算符（&）
+        //运算规则：两个数都转为二进制，然后从高位开始比较，如果两个数都为1则为1，否则为0。
+        //位非运算符（~）
+        //运算规则：如果位为0，结果是1，如果位为1，结果是0.
         sInstallQueueDisabledFlags &= ~flag;
         flushInstallQueue(context);
     }

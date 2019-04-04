@@ -441,6 +441,7 @@ public class LauncherModel extends BroadcastReceiver
      */
     public boolean startLoader(int synchronousBindPage) {
         // Enable queue before starting loader. It will get disabled in Launcher#finishBindingItems
+        //启动加载器前启用队列。它将在Launcher＃finishBindingItems中被禁用
         InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
         synchronized (mLock) {
             // Don't bother to start the thread if we know it's not going to do anything
@@ -450,6 +451,7 @@ public class LauncherModel extends BroadcastReceiver
                 mUiExecutor.execute(oldCallbacks::clearPendingBinds);
 
                 // If there is already one running, tell it to stop.
+                //如果已经有一个正在运行，请告诉它停止。
                 stopLoader();
                 LoaderResults loaderResults = new LoaderResults(mApp, sBgDataModel,
                         mBgAllAppsList, synchronousBindPage, mCallbacks);
@@ -487,6 +489,7 @@ public class LauncherModel extends BroadcastReceiver
     public void startLoaderForResults(LoaderResults results) {
         synchronized (mLock) {
             stopLoader();
+            //加载工作区应用和显示所有区的应用
             mLoaderTask = new LoaderTask(mApp, mBgAllAppsList, sBgDataModel, results);
             runOnWorkerThread(mLoaderTask);
         }

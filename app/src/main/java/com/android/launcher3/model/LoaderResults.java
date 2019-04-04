@@ -31,6 +31,7 @@ import com.android.launcher3.MainThreadExecutor;
 import com.android.launcher3.PagedView;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LooperIdleLock;
 import com.android.launcher3.util.MultiHashMap;
@@ -48,10 +49,12 @@ import java.util.concurrent.Executor;
 
 /**
  * Helper class to handle results of {@link LoaderTask}.
+ * Helper类来处理{@link LoaderTask}的结果。
  */
 public class LoaderResults {
 
-    private static final String TAG = "LoaderResults";
+    //    private static final String TAG = "LoaderResults";
+    private static final String TAG = TagConfig.TAG;
     private static final long INVALID_SCREEN_ID = -1L;
     private static final int ITEMS_CHUNK = 6; // batch size for the workspace icons
 
@@ -65,7 +68,7 @@ public class LoaderResults {
     private final WeakReference<Callbacks> mCallbacks;
 
     public LoaderResults(LauncherAppState app, BgDataModel dataModel,
-            AllAppsList allAppsList, int pageToBindFirst, WeakReference<Callbacks> callbacks) {
+                         AllAppsList allAppsList, int pageToBindFirst, WeakReference<Callbacks> callbacks) {
         mUiExecutor = new MainThreadExecutor();
         mApp = app;
         mBgDataModel = dataModel;
@@ -160,6 +163,7 @@ public class LoaderResults {
         // happens later).
         // This ensures that the first screen is immediately visible (eg. during rotation)
         // In case of !validFirstPage, bind all pages one after other.
+        //延期执行
         final Executor deferredExecutor =
                 validFirstPage ? new ViewOnDrawExecutor() : mainExecutor;
 
@@ -207,16 +211,25 @@ public class LoaderResults {
     }
 
 
-    /** Filters the set of items who are directly or indirectly (via another container) on the
-     * specified screen. */
+    /**
+     * Filters the set of items who are directly or indirectly (via another container) on the
+     * specified screen.
+     * 过滤*指定屏幕上直接或间接（通过另一个容器）的项目集
+     *
+     * @param currentScreenId    当前屏幕ID
+     * @param allWorkspaceItems  所有项目条目
+     * @param currentScreenItems 当前项目条目(需要补充的集合)
+     * @param otherScreenItems   其他项目条目
+     */
     public static <T extends ItemInfo> void filterCurrentWorkspaceItems(long currentScreenId,
-            ArrayList<T> allWorkspaceItems,
-            ArrayList<T> currentScreenItems,
-            ArrayList<T> otherScreenItems) {
+                                                                        ArrayList<T> allWorkspaceItems,
+                                                                        ArrayList<T> currentScreenItems,
+                                                                        ArrayList<T> otherScreenItems) {
         // Purge any null ItemInfos
         Iterator<T> iter = allWorkspaceItems.iterator();
         while (iter.hasNext()) {
             ItemInfo i = iter.next();
+            Log.i(TAG, "LoaderResults-filterCurrentWorkspaceItems: 记录所有条目：" + i.toString());
             if (i == null) {
                 iter.remove();
             }
@@ -227,23 +240,26 @@ public class LoaderResults {
         // as well as all items in those containers.
         Set<Long> itemsOnScreen = new HashSet<>();
         Collections.sort(allWorkspaceItems, new Comparator<ItemInfo>() {
+            //返回正数，零，负数各代表大于，等于，小于
             @Override
             public int compare(ItemInfo lhs, ItemInfo rhs) {
                 return Utilities.longCompare(lhs.container, rhs.container);
             }
         });
         for (T info : allWorkspaceItems) {
-            if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+
+            if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) { //如果是桌面
+                //判断屏幕id，是第几个屏幕，ID从0开始
                 if (info.screenId == currentScreenId) {
                     currentScreenItems.add(info);
                     itemsOnScreen.add(info.id);
                 } else {
                     otherScreenItems.add(info);
                 }
-            } else if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
+            } else if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {//如果是hotseat
                 currentScreenItems.add(info);
                 itemsOnScreen.add(info.id);
-            } else {
+            } else {//其他
                 if (itemsOnScreen.contains(info.container)) {
                     currentScreenItems.add(info);
                     itemsOnScreen.add(info.id);
@@ -254,8 +270,10 @@ public class LoaderResults {
         }
     }
 
-    /** Sorts the set of items by hotseat, workspace (spatially from top to bottom, left to
-     * right) */
+    /**
+     * Sorts the set of items by hotseat, workspace (spatially from top to bottom, left to
+     * right)
+     */
     private void sortWorkspaceItemsSpatially(ArrayList<ItemInfo> workspaceItems) {
         final InvariantDeviceProfile profile = mApp.getInvariantDeviceProfile();
         final int screenCols = profile.numColumns;
@@ -293,20 +311,20 @@ public class LoaderResults {
     }
 
     private void bindWorkspaceItems(final ArrayList<ItemInfo> workspaceItems,
-            final ArrayList<LauncherAppWidgetInfo> appWidgets,
-            final Executor executor) {
+                                    final ArrayList<LauncherAppWidgetInfo> appWidgets,
+                                    final Executor executor) {
 
         // Bind the workspace items
         int N = workspaceItems.size();
         for (int i = 0; i < N; i += ITEMS_CHUNK) {
             final int start = i;
-            final int chunkSize = (i+ITEMS_CHUNK <= N) ? ITEMS_CHUNK : (N-i);
+            final int chunkSize = (i + ITEMS_CHUNK <= N) ? ITEMS_CHUNK : (N - i);
             final Runnable r = new Runnable() {
                 @Override
                 public void run() {
                     Callbacks callbacks = mCallbacks.get();
                     if (callbacks != null) {
-                        callbacks.bindItems(workspaceItems.subList(start, start+chunkSize), false);
+                        callbacks.bindItems(workspaceItems.subList(start, start + chunkSize), false);
                     }
                 }
             };
@@ -348,8 +366,7 @@ public class LoaderResults {
 
     public void bindAllApps() {
         // shallow copy
-        @SuppressWarnings("unchecked")
-        final ArrayList<AppInfo> list = (ArrayList<AppInfo>) mBgAllAppsList.data.clone();
+        @SuppressWarnings("unchecked") final ArrayList<AppInfo> list = (ArrayList<AppInfo>) mBgAllAppsList.data.clone();
 
         Runnable r = new Runnable() {
             public void run() {

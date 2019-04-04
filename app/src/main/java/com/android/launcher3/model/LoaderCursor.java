@@ -44,6 +44,7 @@ import com.android.launcher3.Workspace;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.graphics.BitmapInfo;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.logging.FileLog;
@@ -60,7 +61,8 @@ import java.util.ArrayList;
  */
 public class LoaderCursor extends CursorWrapper {
 
-    private static final String TAG = "LoaderCursor";
+//    private static final String TAG = "LoaderCursor";
+    private static final String TAG = TagConfig.TAG;
 
     public final LongSparseArray<UserHandle> allUsers = new LongSparseArray<>();
 

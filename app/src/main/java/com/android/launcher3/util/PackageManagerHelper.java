@@ -51,6 +51,7 @@ import java.util.List;
 
 /**
  * Utility methods using package manager
+ * 包管理帮助类
  */
 public class PackageManagerHelper {
 

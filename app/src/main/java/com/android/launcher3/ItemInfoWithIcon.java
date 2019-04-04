@@ -55,6 +55,7 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
 
     /**
      * Indicates that the icon is disabled as the user is in quiet mode.
+     * 表示当用户处于安静模式时图标被禁用。
      */
     public static final int FLAG_DISABLED_QUIET_USER = 1 << 3;
 

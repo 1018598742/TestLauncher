@@ -903,6 +903,7 @@ public class GridSizeMigrationTask {
             return true;
         }
 
+        //迁移开始时间
         long migrationStartTime = System.currentTimeMillis();
         try {
             boolean dbChanged = false;
@@ -928,6 +929,7 @@ public class GridSizeMigrationTask {
 
             if (dbChanged) {
                 // Make sure we haven't removed everything.
+                //确保我们没有删除所有内容。
                 final Cursor c = context.getContentResolver().query(
                         LauncherSettings.Favorites.CONTENT_URI, null, null, null, null);
                 boolean hasData = c.moveToNext();

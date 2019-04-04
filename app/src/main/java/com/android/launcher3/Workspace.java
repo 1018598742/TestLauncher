@@ -870,6 +870,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
     /**
      * At bind time, we use the rank (screenId) to compute x and y for hotseat items.
      * See {@link #addInScreen}.
+     * 工作空间绑定条目
      */
     public void addInScreenFromBind(View child, ItemInfo info) {
         int x = info.cellX;

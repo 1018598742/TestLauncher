@@ -149,11 +149,13 @@ public class LoaderTask implements Runnable {
         long firstScreen = mBgDataModel.workspaceScreens.isEmpty()
                 ? -1 // In this case, we can still look at the items in the hotseat.
                 : mBgDataModel.workspaceScreens.get(0);
+        //从 allItems 中给 firstScreenItems 赋值
         filterCurrentWorkspaceItems(firstScreen, allItems, firstScreenItems,
                 new ArrayList<>() /* otherScreenItems are ignored */);
         mFirstScreenBroadcast.sendBroadcasts(mApp.getContext(), firstScreenItems);
     }
 
+    @Override
     public void run() {
         synchronized (this) {
             // Skip fast if we are already stopped.
@@ -163,6 +165,8 @@ public class LoaderTask implements Runnable {
         }
 
         TraceHelper.beginSection(TAG);
+        //LoaderTransaction 实现了 AutoCloseable;效果执行完下面代码会执行 close 方法;需要把初始化实例
+        //卸载 try 块中;为了配合生命周期
         try (LauncherModel.LoaderTransaction transaction = mApp.getModel().beginLoader(this)) {
             TraceHelper.partitionSection(TAG, "step 1.1: loading workspace");
             loadWorkspace();
@@ -177,6 +181,7 @@ public class LoaderTask implements Runnable {
 
             // Take a break
             TraceHelper.partitionSection(TAG, "step 1 completed, wait for idle");
+            //等待
             waitForIdle();
             verifyNotStopped();
 
@@ -231,6 +236,9 @@ public class LoaderTask implements Runnable {
         this.notify();
     }
 
+    /**
+     * 加载工作空间
+     */
     private void loadWorkspace() {
         final Context context = mApp.getContext();
         final ContentResolver contentResolver = context.getContentResolver();
@@ -337,9 +345,9 @@ public class LoaderTask implements Runnable {
 
                         boolean allowMissingTarget = false;
                         switch (c.itemType) {
-                        case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-                        case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
-                        case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT:
+                        case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT://1
+                        case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION://0
+                        case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT://6
                             intent = c.parseIntent();
                             if (intent == null) {
                                 c.markDeleted("Invalid or null intent");

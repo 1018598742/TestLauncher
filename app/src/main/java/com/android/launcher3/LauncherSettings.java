@@ -52,6 +52,7 @@ public class LauncherSettings {
 
         /**
          * The type of the gesture
+         * 手势类型
          *
          * <P>Type: INTEGER</P>
          */
@@ -174,6 +175,7 @@ public class LauncherSettings {
         /**
          * The X coordinate of the cell holding the favorite
          * (if container is CONTAINER_HOTSEAT or CONTAINER_HOTSEAT)
+         * 持有收藏夹的单元格的X坐标
          * <P>Type: INTEGER</P>
          */
         public static final String CELLX = "cellX";
@@ -199,6 +201,7 @@ public class LauncherSettings {
 
         /**
          * The profile id of the item in the cell.
+         * 单元格中项目的配置文件ID
          * <P>
          * Type: INTEGER
          * </P>

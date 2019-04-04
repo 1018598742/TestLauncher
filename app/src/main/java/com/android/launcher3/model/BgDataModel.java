@@ -53,6 +53,7 @@ import java.util.Map;
 
 /**
  * All the data stored in-memory and managed by the LauncherModel
+ * 所有数据都存储在内存中并由LauncherModel管理
  */
 public class BgDataModel {
 
@@ -97,6 +98,8 @@ public class BgDataModel {
 
     /**
      * Maps all launcher activities to the id's of their shortcuts (if they have any).
+     * 将所有启动器活动映射到其快捷方式的ID（如果有的话）。
+     *
      */
     public final MultiHashMap<ComponentKey, String> deepShortcutMap = new MultiHashMap<>();
 

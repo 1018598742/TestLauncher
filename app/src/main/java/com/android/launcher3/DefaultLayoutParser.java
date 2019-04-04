@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Implements the layout parser with rules for internal layouts and partner layouts.
+ * 使用内部布局和合作伙伴布局的规则实现布局解析器。
  */
 public class DefaultLayoutParser extends AutoInstallsLayout {
     private static final String TAG = "DefaultLayoutParser";

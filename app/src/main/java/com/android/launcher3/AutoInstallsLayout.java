@@ -40,6 +40,7 @@ import android.util.Patterns;
 import com.android.launcher3.LauncherProvider.SqlArguments;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.util.Thunk;
 import java.io.IOException;
@@ -52,7 +53,8 @@ import org.xmlpull.v1.XmlPullParserException;
  * Layout parsing code for auto installs layout
  */
 public class AutoInstallsLayout {
-    private static final String TAG = "AutoInstalls";
+//    private static final String TAG = "AutoInstalls";
+    private static final String TAG = TagConfig.TAG;
     private static final boolean LOGD = false;
 
     /** Marker action used to discover a package which defines launcher customization */
@@ -202,6 +204,7 @@ public class AutoInstallsLayout {
 
     /**
      * Parses the layout and returns the number of elements added on the homescreen.
+     * 第一次运行真正从 xml 文件中解析布局信息
      */
     protected int parseLayout(int layoutId, ArrayList<Long> screenIds)
             throws XmlPullParserException, IOException {

@@ -28,6 +28,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Utility class to preload LauncherModel
+ * 用于预加载LauncherModel的实用程序类
+ * 没有使用？
  */
 public class ModelPreload implements ModelUpdateTask {
 

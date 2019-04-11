@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hello World!" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="handleXml"
+        android:onClick="handleXml"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="解析 xml Activity"
+        android:onClick="handleXmlActivity"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="secondActivity"
+        android:onClick="secondActivity"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="根据用户获取所有应用"
+        android:onClick="obtainAllApps"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="通过 Uri Intent找到对应程序"
+        android:onClick="obtainIntent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="查看应用是否是系统的"
+        android:onClick="findSysApp"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/packageEt"
+        android:hint="com.taobao.taobao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="卸载应用"
+        android:onClick="uninstallApp"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="Log测试"
+        android:onClick="toJumpLog"
+        android:layout_height="wrap_content" />
+</LinearLayout>

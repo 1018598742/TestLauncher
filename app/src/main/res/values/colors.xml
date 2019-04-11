@@ -27,8 +27,10 @@
 
     <color name="default_shadow_color_no_alpha">#FF000000</color>
 
-    <color name="spring_loaded_panel_color">#40FFFFFF</color>
-    <color name="spring_loaded_highlighted_panel_border_color">#FFF</color>
+    <!--<color name="spring_loaded_panel_color">#40FFFFFF</color>-->
+    <color name="spring_loaded_panel_color">#4007f461</color>
+    <!--<color name="spring_loaded_highlighted_panel_border_color">#FFF</color>-->
+    <color name="spring_loaded_highlighted_panel_border_color">#ba0bf0</color>
 
     <!-- Popup container -->
     <color name="notification_icon_default_color">#757575</color> <!-- Gray 600 -->

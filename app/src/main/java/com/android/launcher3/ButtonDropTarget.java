@@ -223,6 +223,11 @@ public abstract class ButtonDropTarget extends TextView
         }
     }
 
+    /**
+     * 开始拖动；由于之前注册了接口 addDragListener
+     * @param dragObject The object being dragged
+     * @param options Options used to start the drag
+     */
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
         mActive = supportsDrop(dragObject.dragInfo);

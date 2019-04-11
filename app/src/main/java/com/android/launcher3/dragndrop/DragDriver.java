@@ -45,6 +45,11 @@ public abstract class DragDriver {
      */
     public void onDragViewAnimationEnd() { }
 
+    /**
+     * 检测手势滑动的时候
+     * @param ev
+     * @return
+     */
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
 
@@ -87,6 +92,7 @@ public abstract class DragDriver {
         if (Utilities.ATLEAST_NOUGAT && options.systemDndStartPoint != null) {
             return new SystemDragDriver(dragController, context, dragObject);
         } else {
+            //桌面图标拖动走的这个
             return new InternalDragDriver(dragController);
         }
     }
@@ -94,6 +100,7 @@ public abstract class DragDriver {
 
 /**
  * Class for driving a system (i.e. framework) drag/drop operation.
+ * 用于驱动系统（即框架）拖放操作的类。
  */
 class SystemDragDriver extends DragDriver {
 

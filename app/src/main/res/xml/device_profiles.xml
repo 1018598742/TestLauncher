@@ -55,7 +55,7 @@
         launcher:numFolderColumns="4"
         launcher:iconSize="48"
         launcher:iconTextSize="13.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="4"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -69,7 +69,7 @@
         launcher:numFolderColumns="4"
         launcher:iconSize="48"
         launcher:iconTextSize="13.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="4"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -83,7 +83,7 @@
         launcher:numFolderColumns="4"
         launcher:iconSize="48"
         launcher:iconTextSize="13.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="4"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -97,7 +97,7 @@
         launcher:numFolderColumns="4"
         launcher:iconSize="54"
         launcher:iconTextSize="13.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="4"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -111,7 +111,7 @@
         launcher:numFolderColumns="4"
         launcher:iconSize="54"
         launcher:iconTextSize="13.0"
-        launcher:numHotseatIcons="5"
+        launcher:numHotseatIcons="4"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 

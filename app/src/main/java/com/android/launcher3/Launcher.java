@@ -801,7 +801,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         // Refresh shortcuts if the permission changed.
         mModel.refreshShortcutsIfRequired();
 
-        DiscoveryBounce.showForHomeIfNeeded(this);
+        // TODO: 2019/4/10 取消上弹动画
+        if (!FeatureFlags.REMOVE_DRAWER){
+            DiscoveryBounce.showForHomeIfNeeded(this);
+        }
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onResume();
         }
@@ -995,6 +998,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     /**
      * Add a shortcut to the workspace or to a Folder.
+     * 添加工作区或文件夹的快捷方式。
      *
      * @param data The intent describing the shortcut.
      */
@@ -1223,9 +1227,12 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
     @Override
     protected void onNewIntent(Intent intent) {
+        //性能分析类方法
         TraceHelper.beginSection("NEW_INTENT");
         super.onNewIntent(intent);
 
+        Log.i(TAG, "Launcher-onNewIntent: ");
+        
         boolean alreadyOnHome = hasWindowFocus() && ((intent.getFlags() &
                 Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
                 != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);

@@ -18,10 +18,12 @@ package com.android.launcher3.model;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherActivityInfo;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.launcher3.AllAppsList;
 import com.android.launcher3.AppInfo;
@@ -156,6 +158,12 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
 
         final ArrayList<AppInfo> addedOrModified = new ArrayList<>();
         addedOrModified.addAll(appsList.added);
+
+        // TODO: 2019/4/10 应用安装时更新应用
+        if(FeatureFlags.REMOVE_DRAWER){
+            updateToWorkSpace(context, app, appsList);
+        }
+
         appsList.added.clear();
         addedOrModified.addAll(appsList.modified);
         appsList.modified.clear();
@@ -364,6 +372,36 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                 dataModel.widgetsModel.update(app, new PackageUserKey(packages[i], mUser));
             }
             bindUpdatedWidgets(dataModel);
+        }
+    }
+
+    /**
+     * 更新应用到桌面
+     * @param context
+     * @param app
+     * @param appsList
+     */
+    private void updateToWorkSpace(Context context, LauncherAppState app, AllAppsList appsList) {
+        final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
+        ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo>();
+        ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+        for (UserHandle user : profiles) {
+            final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(context).getActivityList(null, user);
+
+            synchronized (this) {
+                for (LauncherActivityInfo info : apps) {
+                    for (AppInfo appInfo : appsList.added) {
+                        if(info.getComponentName().equals(appInfo.componentName)){
+                            InstallShortcutReceiver.PendingInstallShortcutInfo mPendingInstallShortcutInfo =  new InstallShortcutReceiver.PendingInstallShortcutInfo(info,context);
+                            added.add(mPendingInstallShortcutInfo);
+                            installQueue.add(mPendingInstallShortcutInfo.getItemInfo());
+                        }
+                    }
+                }
+            }
+        }
+        if (!added.isEmpty()) {
+            app.getModel().addAndBindAddedWorkspaceItems(installQueue);
         }
     }
 }

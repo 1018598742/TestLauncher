@@ -37,6 +37,7 @@ import com.android.launcher3.views.TopRoundedCornerView;
 
 /**
  * Popup for showing the full list of available widgets
+ * Popup用于显示可用小部件的完整列表
  */
 public class WidgetsFullSheet extends BaseWidgetSheet
         implements Insettable, ProviderChangedListener {

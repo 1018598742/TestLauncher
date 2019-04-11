@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -44,6 +45,7 @@ import com.android.launcher3.IconCache.ItemInfoUpdateReceiver;
 import com.android.launcher3.Launcher.OnResumeCallback;
 import com.android.launcher3.badge.BadgeInfo;
 import com.android.launcher3.badge.BadgeRenderer;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DrawableFactory;
 import com.android.launcher3.graphics.IconPalette;
@@ -63,7 +65,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     private static final int DISPLAY_ALL_APPS = 1;
     private static final int DISPLAY_FOLDER = 2;
 
-    private static final int[] STATE_PRESSED = new int[] {android.R.attr.state_pressed};
+    private static final int[] STATE_PRESSED = new int[]{android.R.attr.state_pressed};
 
 
     private static final Property<BubbleTextView, Float> BADGE_SCALE_PROPERTY
@@ -92,6 +94,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
             bubbleTextView.setTextAlpha(alpha);
         }
     };
+    private static final String TAG = TagConfig.TAG;
 
     private final BaseDraggingActivity mActivity;
     private Drawable mIcon;
@@ -274,7 +277,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         return drawableState;
     }
 
-    /** Returns the icon for this view. */
+    /**
+     * Returns the icon for this view.
+     */
     public Drawable getIcon() {
         return mIcon;
     }
@@ -284,25 +289,26 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         // Call the superclass onTouchEvent first, because sometimes it changes the state to
         // isPressed() on an ACTION_UP
         boolean result = super.onTouchEvent(event);
-
         // Check for a stylus button press, if it occurs cancel any long press checks.
         if (mStylusEventHelper.onMotionEvent(event)) {
             mLongPressHelper.cancelLongPress();
             result = true;
         }
 
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
+        int action = event.getAction();
+        Log.i(TAG, "BubbleTextView-onTouchEvent: action=" + action);
+        switch (action) {
+            case MotionEvent.ACTION_DOWN://0
                 // If we're in a stylus button press, don't check for long press.
                 if (!mStylusEventHelper.inStylusButtonPressed()) {
                     mLongPressHelper.postCheckForLongPress();
                 }
                 break;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL://3
+            case MotionEvent.ACTION_UP://1
                 mLongPressHelper.cancelLongPress();
                 break;
-            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_MOVE://2
                 if (!Utilities.pointInView(this, event.getX(), event.getY(), mSlop)) {
                     mLongPressHelper.cancelLongPress();
                 }
@@ -353,6 +359,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
 
     /**
      * Draws the icon badge in the top right corner of the icon bounds.
+     *
      * @param canvas The canvas to draw to.
      */
     protected void drawBadgeIfNecessary(Canvas canvas) {
@@ -449,6 +456,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
 
     /**
      * Creates an animator to fade the text in or out.
+     *
      * @param fadeIn Whether the text should fade in or fade out.
      */
     public ObjectAnimator createTextAlphaAnimator(boolean fadeIn) {

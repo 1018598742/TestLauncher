@@ -36,6 +36,7 @@ import com.android.launcher3.states.InternalStateHandler;
 
 /**
  * Abstract base class of floating view responsible for showing discovery bounce animation
+ * 浮动视图的抽象基类，负责显示发现反弹动画
  */
 public class DiscoveryBounce extends AbstractFloatingView {
 
@@ -133,7 +134,12 @@ public class DiscoveryBounce extends AbstractFloatingView {
         }
 
         if (withDelay) {
-            new Handler().postDelayed(() -> showForHomeIfNeeded(launcher, false), DELAY_MS);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showForHomeIfNeeded(launcher,false);
+                }
+            },DELAY_MS);
             return;
         }
 

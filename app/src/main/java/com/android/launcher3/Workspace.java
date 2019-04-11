@@ -58,6 +58,7 @@ import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.badge.FolderBadgeInfo;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.dragndrop.DragOptions;
@@ -106,7 +107,8 @@ import static com.android.launcher3.dragndrop.DragLayer.ALPHA_INDEX_OVERLAY;
 public class Workspace extends PagedView<WorkspacePageIndicator>
         implements DropTarget, DragSource, View.OnTouchListener,
         DragController.DragListener, Insettable, LauncherStateManager.StateHandler {
-    private static final String TAG = "Launcher.Workspace";
+    //    private static final String TAG = "Launcher.Workspace";
+    private static final String TAG = TagConfig.TAG;
 
     /**
      * The value that {@link #mTransitionProgress} must be greater than for
@@ -127,9 +129,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
 
-    //    private static final int DEFAULT_PAGE = 0;
-// TODO: 2019/4/2
-    private static final int DEFAULT_PAGE = 2;
+    //home键默认显示哪一页
+    private static final int DEFAULT_PAGE = 0;
+//    private static final int DEFAULT_PAGE = 2;
 
     private static final boolean MAP_NO_RECURSE = false;
     private static final boolean MAP_RECURSE = true;
@@ -379,6 +381,12 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         return r;
     }
 
+    /**
+     * 开始拖动；由于之前注册了接口 addDragListener
+     *
+     * @param dragObject The object being dragged
+     * @param options    Options used to start the drag
+     */
     @Override
     public void onDragStart(DragObject dragObject, DragOptions options) {
         if (ENFORCE_DRAG_EVENT_ORDER) {
@@ -440,6 +448,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public void onDragEnd() {
+        Log.i(TAG, "Workspace-onDragEnd: ");
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragEnd", 0, 0);
         }
@@ -572,7 +581,8 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     /**
      * 插入新工作区屏幕
-     * @param screenId 屏幕ID
+     *
+     * @param screenId    屏幕ID
      * @param insertIndex 插入位置下标
      * @return 返回布局
      */
@@ -963,6 +973,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
 
         child.setHapticFeedbackEnabled(false);
+        // TODO: 2019/4/9 设置条目长按监听
         child.setOnLongClickListener(ItemLongClickListener.INSTANCE_WORKSPACE);
         if (child instanceof DropTarget) {
             mDragController.addDropTarget((DropTarget) child);
@@ -1308,6 +1319,9 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
     }
 
+    /**
+     * 为了实现偏移控制
+     */
     @Override
     public void computeScroll() {
         super.computeScroll();
@@ -1362,6 +1376,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
     }
 
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         IBinder windowToken = getWindowToken();
@@ -1547,6 +1562,11 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         page.setAccessibilityDelegate(null);
     }
 
+    /**
+     * 条目长按触发拖动方法。
+     *
+     * @see ItemLongClickListener#beginDrag
+     */
     public void startDrag(CellLayout.CellInfo cellInfo, DragOptions options) {
         View child = cellInfo.cell;
 
@@ -1584,8 +1604,10 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         float iconScale = 1f;
         if (child instanceof BubbleTextView) {
             Drawable icon = ((BubbleTextView) child).getIcon();
+            Log.i(TAG, "Workspace-beginDragShared: instanceof BubbleTextView");
             if (icon instanceof FastBitmapDrawable) {
                 iconScale = ((FastBitmapDrawable) icon).getAnimatedScale();
+                Log.i(TAG, "Workspace-beginDragShared: instanceof FastBitmapDrawable");
             }
         }
 
@@ -1594,13 +1616,15 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         mOutlineProvider = previewProvider;
 
         // The drag bitmap follows the touch point around on the screen
+        //创建拖动的图标
         final Bitmap b = previewProvider.createDragBitmap();
         int halfPadding = previewProvider.previewPadding / 2;
 
         float scale = previewProvider.getScaleAndPosition(b, mTempXY);
+        Log.i(TAG, "Workspace-beginDragShared: scale=" + scale);
         int dragLayerX = mTempXY[0];
         int dragLayerY = mTempXY[1];
-
+        Log.i(TAG, "Workspace-beginDragShared: dragLayerX=" + dragLayerX + "=dragLayerY=" + dragLayerY);
         DeviceProfile grid = mLauncher.getDeviceProfile();
         Point dragVisualizeOffset = null;
         Rect dragRect = null;
@@ -1620,12 +1644,14 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         }
 
         // Clear the pressed state if necessary
+        //必要时清除按下的状态
         if (child instanceof BubbleTextView) {
             BubbleTextView icon = (BubbleTextView) child;
             icon.clearPressedBackground();
         }
 
         if (child.getParent() instanceof ShortcutAndWidgetContainer) {
+            //桌面图标拖动时不走这
             mDragSourceInternal = (ShortcutAndWidgetContainer) child.getParent();
         }
 
@@ -2109,8 +2135,14 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 (int) (mTempXY[1] + scale * boundingLayout.getMeasuredHeight()));
     }
 
+    /**
+     * 调用此方法后出现外部框
+     *
+     * @param d
+     */
     @Override
     public void onDragEnter(DragObject d) {
+        Log.i(TAG, "Workspace-onDragEnter: ");
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragEnter", 1, 1);
         }
@@ -2125,6 +2157,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
 
     @Override
     public void onDragExit(DragObject d) {
+        Log.i(TAG, "Workspace-onDragExit: ");
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragExit", -1, 0);
         }
@@ -2177,8 +2210,14 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         setCurrentDropOverCell(-1, -1);
     }
 
+    /**
+     * layout 不为空才会调用显示外框
+     *
+     * @param layout
+     */
     void setCurrentDragOverlappingLayout(CellLayout layout) {
         if (mDragOverlappingLayout != null) {
+            Log.i(TAG, "Workspace-setCurrentDragOverlappingLayout: is not null");
             mDragOverlappingLayout.setIsDragOverlapping(false);
         }
         mDragOverlappingLayout = layout;
@@ -2284,7 +2323,14 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
                 d.dragInfo instanceof PendingAddWidgetInfo);
     }
 
+    /**
+     * 调用很多次
+     *
+     * @param d
+     */
+    @Override
     public void onDragOver(DragObject d) {
+        Log.i(TAG, "Workspace-onDragOver: ");
         // Skip drag over events while we are dragging over side pages
         if (!transitionStateShouldAllowDrop()) return;
 
@@ -2396,6 +2442,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             // Check if the item is dragged over left page
             mTempTouchCoordinates[0] = Math.min(centerX, d.x);
             mTempTouchCoordinates[1] = d.y;
+            //桌面拖动时此方法，layout 返回 null
             layout = verifyInsidePage(nextPage + (mIsRtl ? 1 : -1), mTempTouchCoordinates);
         }
 
@@ -2403,14 +2450,17 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
             // Check if the item is dragged over right page
             mTempTouchCoordinates[0] = Math.max(centerX, d.x);
             mTempTouchCoordinates[1] = d.y;
+            //桌面拖动时此方法，layout 返回 null
             layout = verifyInsidePage(nextPage + (mIsRtl ? -1 : 1), mTempTouchCoordinates);
         }
 
         // Always pick the current page.
         if (layout == null && nextPage >= 0 && nextPage < getPageCount()) {
+            Log.i(TAG, "Workspace-setDropLayoutForDragObject: nextPage=" + nextPage + "=getPageCount=" + getPageCount());
             layout = (CellLayout) getChildAt(nextPage);
         }
         if (layout != mDragTargetLayout) {
+            Log.i(TAG, "Workspace-setDropLayoutForDragObject: layout is not mDragTargetLayout");
             setCurrentDropLayout(layout);
             setCurrentDragOverlappingLayout(layout);
             return true;
@@ -2422,6 +2472,7 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
      * Returns the child CellLayout if the point is inside the page coordinates, null otherwise.
      */
     private CellLayout verifyInsidePage(int pageNo, float[] touchXy) {
+        Log.i(TAG, "Workspace-verifyInsidePage: pageNo=" + pageNo + "=getPageCount=" + getPageCount());
         if (pageNo >= 0 && pageNo < getPageCount()) {
             CellLayout cl = (CellLayout) getChildAt(pageNo);
             mapPointFromSelfToChild(cl, touchXy);

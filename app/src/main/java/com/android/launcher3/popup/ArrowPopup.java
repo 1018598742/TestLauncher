@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.RevealOutlineAnimation;
 import com.android.launcher3.anim.RoundedRectRevealOutlineProvider;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.graphics.TriangleShape;
 import com.android.launcher3.util.Themes;
@@ -53,9 +55,11 @@ import java.util.Collections;
 
 /**
  * A container for shortcuts to deep links and notifications associated with an app.
+ * 用于与应用关联的深层链接和通知的快捷方式的容器。
  */
 public abstract class ArrowPopup extends AbstractFloatingView {
 
+    private static final String TAG = TagConfig.TAG;
     private final Rect mTempRect = new Rect();
 
     protected final LayoutInflater mInflater;
@@ -125,10 +129,12 @@ public abstract class ArrowPopup extends AbstractFloatingView {
     /**
      * Called when all view inflation and reordering in complete.
      */
-    protected void onInflationComplete(boolean isReversed) { }
+    protected void onInflationComplete(boolean isReversed) {
+    }
 
     /**
      * Shows the popup at the desired location, optionally reversing the children.
+     *
      * @param viewsToFlip number of views from the top to to flip in case of reverse order
      */
     protected void reorderAndShow(int viewsToFlip) {
@@ -204,13 +210,13 @@ public abstract class ArrowPopup extends AbstractFloatingView {
 
     /**
      * Orients this container above or below the given icon, aligning with the left or right.
-     *
+     * <p>
      * These are the preferred orientations, in order (RTL prefers right-aligned over left):
      * - Above and left-aligned
      * - Above and right-aligned
      * - Below and left-aligned
      * - Below and right-aligned
-     *
+     * <p>
      * So we always align left if there is enough horizontal space
      * and align above if there is enough vertical space.
      */
@@ -374,6 +380,7 @@ public abstract class ArrowPopup extends AbstractFloatingView {
     }
 
     protected void animateClose() {
+        Log.i(TAG, "ArrowPopup-animateClose: mIsOpen=" + mIsOpen);
         if (!mIsOpen) {
             return;
         }
@@ -424,11 +431,12 @@ public abstract class ArrowPopup extends AbstractFloatingView {
     /**
      * Called when creating the close transition allowing subclass can add additional animations.
      */
-    protected void onCreateCloseAnimation(AnimatorSet anim) { }
+    protected void onCreateCloseAnimation(AnimatorSet anim) {
+    }
 
     private RoundedRectRevealOutlineProvider createOpenCloseOutlineProvider() {
         int arrowCenterX = getResources().getDimensionPixelSize(mIsLeftAligned ^ mIsRtl ?
-                R.dimen.popup_arrow_horizontal_center_start:
+                R.dimen.popup_arrow_horizontal_center_start :
                 R.dimen.popup_arrow_horizontal_center_end);
         if (!mIsLeftAligned) {
             arrowCenterX = getMeasuredWidth() - arrowCenterX;

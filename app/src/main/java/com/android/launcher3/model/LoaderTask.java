@@ -39,6 +39,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.MutableInt;
+import android.util.Pair;
 
 import com.android.launcher3.AllAppsList;
 import com.android.launcher3.AppInfo;
@@ -166,7 +167,7 @@ public class LoaderTask implements Runnable {
 
         TraceHelper.beginSection(TAG);
         //LoaderTransaction 实现了 AutoCloseable;效果执行完下面代码会执行 close 方法;需要把初始化实例
-        //卸载 try 块中;为了配合生命周期
+        //写在 try 块中;为了配合生命周期
         try (LauncherModel.LoaderTransaction transaction = mApp.getModel().beginLoader(this)) {
             TraceHelper.partitionSection(TAG, "step 1.1: loading workspace");
             loadWorkspace();
@@ -185,9 +186,14 @@ public class LoaderTask implements Runnable {
             waitForIdle();
             verifyNotStopped();
 
-            // second step
+            // second step 加载所有数据
             TraceHelper.partitionSection(TAG, "step 2.1: loading all apps");
             loadAllApps();
+
+            // TODO: 2019/4/10 显示所有应用到桌面上
+            if (FeatureFlags.REMOVE_DRAWER){
+                verifyApplications();
+            }
 
             TraceHelper.partitionSection(TAG, "step 2.2: Binding all apps");
             verifyNotStopped();
@@ -230,6 +236,31 @@ public class LoaderTask implements Runnable {
         }
         TraceHelper.endSection(TAG);
     }
+
+
+    private void verifyApplications() {
+        final Context context = mApp.getContext();
+        ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+        final List<UserHandle> profiles = mUserManager.getUserProfiles();
+        for (UserHandle user : profiles) {
+            final List<LauncherActivityInfo> apps = mLauncherApps.getActivityList(null, user);
+            ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo>();
+            synchronized (this) {
+                for (LauncherActivityInfo app : apps) {
+                    //可以在这过滤
+                    ComponentName componentName = app.getComponentName();
+
+                    InstallShortcutReceiver.PendingInstallShortcutInfo pendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(app, context);
+                    added.add(pendingInstallShortcutInfo);
+                    installQueue.add(pendingInstallShortcutInfo.getItemInfo());
+                }
+            }
+            if (!added.isEmpty()) {
+                mApp.getModel().addAndBindAddedWorkspaceItems(installQueue);
+            }
+        }
+    }
+
 
     public synchronized void stopLocked() {
         mStopped = true;

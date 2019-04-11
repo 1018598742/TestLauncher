@@ -109,6 +109,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        Log.i(TAG, "LauncherProvider-onCreate: ");
         if (FeatureFlags.IS_DOGFOOD_BUILD) {
             Log.d(TAG, "Launcher process started");
         }
@@ -130,6 +131,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+        Log.i(TAG, "LauncherProvider-getType: uri="+uri.toString());
         SqlArguments args = new SqlArguments(uri, null, null);
         if (TextUtils.isEmpty(args.where)) {
             return "vnd.android.cursor.dir/" + args.table;
@@ -365,6 +367,7 @@ public class LauncherProvider extends ContentProvider {
         if (Binder.getCallingUid() != Process.myUid()) {
             return null;
         }
+        // TODO: 2019/4/11 创建数据库如果不存在
         createDbIfNotExists();
 
         switch (method) {
@@ -492,6 +495,7 @@ public class LauncherProvider extends ContentProvider {
 
             final boolean usingExternallyProvidedLayout = loader != null;
             if (loader == null) {
+                //在这不是空;初始化loader
                 loader = getDefaultLayoutParser(widgetHost);
             }
 
@@ -689,6 +693,7 @@ public class LauncherProvider extends ContentProvider {
             // Delete items contained in folders which no longer exist (after above statement)
             //  "DELETE FROM favorites  WHERE container <> -100 AND container <> -101 AND container
             //   NOT IN (SELECT _id FROM favorites WHERE itemType = 2)"
+            //<>不等于
             String removeOrphanedFolderItems = "DELETE FROM " + Favorites.TABLE_NAME +
                     " WHERE " +
                     LauncherSettings.Favorites.CONTAINER + " <> " +

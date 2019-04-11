@@ -16,25 +16,27 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.ButtonDropTarget.TOOLTIP_DEFAULT;
-import static com.android.launcher3.ButtonDropTarget.TOOLTIP_LEFT;
-import static com.android.launcher3.ButtonDropTarget.TOOLTIP_RIGHT;
-import static com.android.launcher3.anim.AlphaUpdateListener.updateVisibility;
-
 import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
+import com.android.launcher3.anim.AlphaUpdateListener;
 import com.android.launcher3.anim.Interpolators;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragController.DragListener;
 import com.android.launcher3.dragndrop.DragOptions;
+
+import static com.android.launcher3.ButtonDropTarget.TOOLTIP_DEFAULT;
+import static com.android.launcher3.ButtonDropTarget.TOOLTIP_LEFT;
+import static com.android.launcher3.ButtonDropTarget.TOOLTIP_RIGHT;
 
 /*
  * The top bar containing various drop targets: Delete/App Info/Uninstall.
@@ -44,9 +46,17 @@ public class DropTargetBar extends FrameLayout
 
     protected static final int DEFAULT_DRAG_FADE_DURATION = 175;
     protected static final TimeInterpolator DEFAULT_INTERPOLATOR = Interpolators.ACCEL;
+    private static final String TAG = TagConfig.TAG;
 
-    private final Runnable mFadeAnimationEndRunnable =
-            () -> updateVisibility(DropTargetBar.this);
+//    private final Runnable mFadeAnimationEndRunnable =
+//            () -> updateVisibility(DropTargetBar.this);
+
+    private final Runnable mFadeAnimationEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            AlphaUpdateListener.updateVisibility(DropTargetBar.this);
+        }
+    };
 
     @ViewDebug.ExportedProperty(category = "launcher")
     protected boolean mDeferOnDragEnd;
@@ -67,18 +77,27 @@ public class DropTargetBar extends FrameLayout
         super(context, attrs, defStyle);
     }
 
+    /**
+     * 完成从XML扩展视图。在添加所有子视图后，这被称为通胀的最后阶段
+     */
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDropTargets = new ButtonDropTarget[getChildCount()];
+        Log.i(TAG, "DropTargetBar-onFinishInflate: " + getDropTargetsLength());
         for (int i = 0; i < mDropTargets.length; i++) {
             mDropTargets[i] = (ButtonDropTarget) getChildAt(i);
             mDropTargets[i].setDropTargetBar(this);
         }
     }
 
+    private int getDropTargetsLength() {
+        return mDropTargets != null ? mDropTargets.length : 0;
+    }
+
     @Override
     public void setInsets(Rect insets) {
+        Log.i(TAG, "DropTargetBar-setInsets: "+getDropTargetsLength());
         LayoutParams lp = (LayoutParams) getLayoutParams();
         DeviceProfile grid = Launcher.getLauncher(getContext()).getDeviceProfile();
         mIsVertical = grid.isVerticalBarLayout();
@@ -128,6 +147,7 @@ public class DropTargetBar extends FrameLayout
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.i(TAG, "DropTargetBar-onMeasure: "+getDropTargetsLength());
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -165,6 +185,7 @@ public class DropTargetBar extends FrameLayout
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Log.i(TAG, "DropTargetBar-onLayout: "+getDropTargetsLength());
         if (mIsVertical) {
             int gap = getResources().getDimensionPixelSize(R.dimen.drop_target_vertical_gap);
             int start = gap;
@@ -228,9 +249,11 @@ public class DropTargetBar extends FrameLayout
 
     /*
      * DragController.DragListener implementation
+     * 开始拖动；由于之前注册了接口 addDragListener
      */
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+        Log.i(TAG, "DropTargetBar-onDragStart: "+getDropTargetsLength());
         animateToVisibility(true);
     }
 
@@ -244,6 +267,7 @@ public class DropTargetBar extends FrameLayout
 
     @Override
     public void onDragEnd() {
+        Log.i(TAG, "DropTargetBar-onDragEnd: "+getDropTargetsLength());
         if (!mDeferOnDragEnd) {
             animateToVisibility(false);
         } else {

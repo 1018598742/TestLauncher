@@ -83,6 +83,7 @@ public class LauncherState {
 
     /**
      * Various Launcher states arranged in the increasing order of UI layers
+     * 各种启动器状态按UI层的递增顺序排列
      */
     public static final LauncherState SPRING_LOADED = new SpringLoadedState(1);
     public static final LauncherState OVERVIEW = new OverviewState(2);

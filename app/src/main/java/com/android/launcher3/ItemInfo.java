@@ -93,6 +93,7 @@ public class ItemInfo {
 
     /**
      * Indicates the position in an ordered list.
+     * 指示有序列表中的位置。
      */
     public int rank = 0;
 

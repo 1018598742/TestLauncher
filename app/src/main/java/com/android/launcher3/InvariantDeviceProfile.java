@@ -24,11 +24,13 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Point;
 import android.support.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Xml;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.util.Thunk;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -39,8 +41,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+/**
+ * 不变设备配置文件
+ */
 public class InvariantDeviceProfile {
 
+    private static final String TAG = TagConfig.TAG;
     // This is a static that we use for the default icon size on a 4/5-inch phone
     private static float DEFAULT_ICON_SIZE_DP = 60;
 
@@ -78,6 +84,7 @@ public class InvariantDeviceProfile {
 
     /**
      * Number of icons inside the hotseat area.
+     * 在 hotseat 图标数量。
      */
     public int numHotseatIcons;
 
@@ -133,7 +140,8 @@ public class InvariantDeviceProfile {
         Point largestSize = new Point();
         display.getCurrentSizeRange(smallestSize, largestSize);
 
-        // This guarantees that width < height
+        // This guarantees that width < height 这保证了宽度<高度
+        //获取最小宽高
         minWidthDps = Utilities.dpiFromPx(Math.min(smallestSize.x, smallestSize.y), dm);
         minHeightDps = Utilities.dpiFromPx(Math.min(largestSize.x, largestSize.y), dm);
 
@@ -142,7 +150,6 @@ public class InvariantDeviceProfile {
                 minWidthDps, minHeightDps, getPredefinedDeviceProfiles(context));
         InvariantDeviceProfile interpolatedDeviceProfileOut =
                 invDistWeightedInterpolate(minWidthDps, minHeightDps, closestProfiles);
-
         InvariantDeviceProfile closestProfile = closestProfiles.get(0);
         numRows = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
@@ -151,6 +158,8 @@ public class InvariantDeviceProfile {
         demoModeLayoutId = closestProfile.demoModeLayoutId;
         numFolderRows = closestProfile.numFolderRows;
         numFolderColumns = closestProfile.numFolderColumns;
+
+        Log.i(TAG, "InvariantDeviceProfile-InvariantDeviceProfile: numRows=" + numRows);
 
         iconSize = interpolatedDeviceProfileOut.iconSize;
         landscapeIconSize = interpolatedDeviceProfileOut.landscapeIconSize;
@@ -185,6 +194,11 @@ public class InvariantDeviceProfile {
         }
     }
 
+    /**
+     * 从本地 xml 文件中获取默认数据
+     * @param context
+     * @return
+     */
     ArrayList<InvariantDeviceProfile> getPredefinedDeviceProfiles(Context context) {
         ArrayList<InvariantDeviceProfile> profiles = new ArrayList<>();
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
@@ -266,6 +280,11 @@ public class InvariantDeviceProfile {
 
     /**
      * Returns the closest device profiles ordered by closeness to the specified width and height
+     * 返回按指定宽度和高度接近排序的最近设备配置文件
+     *
+     * @param width  最小宽度
+     * @param height 最小高度
+     * @param points 配置文件解析的集合信息
      */
     // Package private visibility for testing.
     ArrayList<InvariantDeviceProfile> findClosestDeviceProfiles(
@@ -279,6 +298,15 @@ public class InvariantDeviceProfile {
                         dist(width, height, b.minWidthDps, b.minHeightDps));
             }
         });
+
+//        Collections.sort(pointsByNearness, new Comparator<InvariantDeviceProfile>() {
+//            @Override
+//            public int compare(InvariantDeviceProfile a, InvariantDeviceProfile b) {
+//                float hypot = (float) Math.hypot(a.minWidthDps - width, a.minHeightDps - height);
+//                float hypot1 = (float) Math.hypot(b.minWidthDps - width, b.minHeightDps - height);
+//                return Float.compare(hypot, hypot1);
+//            }
+//        });
 
         return pointsByNearness;
     }

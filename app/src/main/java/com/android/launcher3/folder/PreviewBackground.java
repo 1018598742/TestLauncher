@@ -28,9 +28,11 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.support.v4.graphics.ColorUtils;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 
@@ -38,6 +40,8 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAnimUtils;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.util.Themes;
 
 /**
@@ -47,15 +51,17 @@ import com.android.launcher3.util.Themes;
 public class PreviewBackground {
 
     private static final int CONSUMPTION_ANIMATION_DURATION = 100;
+    private static final String TAG = TagConfig.TAG;
 
     private final PorterDuffXfermode mClipPorterDuffXfermode
             = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
     // Create a RadialGradient such that it draws a black circle and then extends with
     // transparent. To achieve this, we keep the gradient to black for the range [0, 1) and
     // just at the edge quickly change it to transparent.
+    //用来进行环形渲染
     private final RadialGradient mClipShader = new RadialGradient(0, 0, 1,
-            new int[] {Color.BLACK, Color.BLACK, Color.TRANSPARENT },
-            new float[] {0, 0.999f, 1},
+            new int[]{Color.BLACK, Color.BLACK, Color.TRANSPARENT},
+            new float[]{0, 0.999f, 1},
             Shader.TileMode.CLAMP);
 
     private final PorterDuffXfermode mShadowPorterDuffXfermode
@@ -146,8 +152,8 @@ public class PreviewBackground {
         float shadowRadius = radius + mStrokeWidth;
         int shadowColor = Color.argb(SHADOW_OPACITY, 0, 0, 0);
         mShadowShader = new RadialGradient(0, 0, 1,
-                new int[] {shadowColor, Color.TRANSPARENT},
-                new float[] {radius / shadowRadius, 1},
+                new int[]{shadowColor, Color.TRANSPARENT},
+                new float[]{radius / shadowRadius, 1},
                 Shader.TileMode.CLAMP);
 
         invalidate();
@@ -205,8 +211,11 @@ public class PreviewBackground {
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(getBgColor());
 
-        drawCircle(canvas, 0 /* deltaRadius */);
-
+        if (FeatureFlags.FOLDER_BG_CIRCLE) {
+            drawCircle(canvas, 0 /* deltaRadius */);
+        } else {
+            drawRect(canvas, 0);
+        }
         drawShadow(canvas);
     }
 
@@ -223,11 +232,13 @@ public class PreviewBackground {
         int offsetY = getOffsetY();
         final int saveCount;
         if (canvas.isHardwareAccelerated()) {
+            //绘制图层
             saveCount = canvas.saveLayer(offsetX - mStrokeWidth, offsetY,
                     offsetX + radius + shadowRadius, offsetY + shadowRadius + shadowRadius, null);
 
         } else {
             saveCount = canvas.save();
+            //切割画布
             canvas.clipPath(getClipPath(), Region.Op.DIFFERENCE);
         }
 
@@ -241,7 +252,12 @@ public class PreviewBackground {
         mPaint.setShader(null);
         if (canvas.isHardwareAccelerated()) {
             mPaint.setXfermode(mShadowPorterDuffXfermode);
-            canvas.drawCircle(radius + offsetX, radius + offsetY, radius, mPaint);
+            if (FeatureFlags.FOLDER_BG_CIRCLE){
+                canvas.drawCircle(radius + offsetX, radius + offsetY, radius, mPaint);
+            }else {
+                RectF rectF = circleChangeRectf(radius,radius+offsetX,radius+offsetY);
+                canvas.drawRect(rectF,mPaint);
+            }
             mPaint.setXfermode(null);
         }
 
@@ -284,7 +300,11 @@ public class PreviewBackground {
         mPaint.setColor(ColorUtils.setAlphaComponent(mBgColor, mStrokeAlpha));
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(mStrokeWidth);
-        drawCircle(canvas, 1 /* deltaRadius */);
+        if (FeatureFlags.FOLDER_BG_CIRCLE) {
+            drawCircle(canvas, 1 /* deltaRadius */);
+        } else {
+            drawRect(canvas, 1);
+        }
     }
 
     public void drawLeaveBehind(Canvas canvas) {
@@ -293,26 +313,73 @@ public class PreviewBackground {
 
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.argb(160, 245, 245, 245));
-        drawCircle(canvas, 0 /* deltaRadius */);
-
+        if (FeatureFlags.FOLDER_BG_CIRCLE) {
+            drawCircle(canvas, 0 /* deltaRadius */);
+        } else {
+            drawRect(canvas, 0 /* deltaRadius */);
+        }
         mScale = originalScale;
     }
 
-    private void drawCircle(Canvas canvas,float deltaRadius) {
+    /**
+     * 画圆形背景
+     *
+     * @param canvas
+     * @param deltaRadius
+     */
+    private void drawCircle(Canvas canvas, float deltaRadius) {
         float radius = getScaledRadius();
         canvas.drawCircle(radius + getOffsetX(), radius + getOffsetY(),
                 radius - deltaRadius, mPaint);
     }
 
+    /**
+     * 圆形数据转换为矩形数据
+     *
+     * @param radius  半径
+     * @param circleX 圆心x位置
+     * @param circleY 圆心y位置
+     * @return
+     */
+    private RectF circleChangeRectf(float radius, float circleX, float circleY) {
+        RectF rectF = new RectF();
+        rectF.left = circleX - radius;
+        rectF.right = circleX + radius;
+        rectF.top = circleY - radius;
+        rectF.bottom = circleY + radius;
+        return rectF;
+    }
+
+    /**
+     * 画矩形背景
+     *
+     * @param canvas
+     * @param deltaRadius
+     */
+    private void drawRect(Canvas canvas, float deltaRadius) {
+        float radius = getScaledRadius();
+        float circleX = radius + getOffsetX();
+        float circleY = radius + getOffsetY();
+        float circle = radius - deltaRadius;
+        RectF rectF = circleChangeRectf(circle, circleX, circleY);
+        canvas.drawRect(rectF, mPaint);
+    }
+
     public Path getClipPath() {
         mPath.reset();
         float r = getScaledRadius();
-        mPath.addCircle(r + getOffsetX(), r + getOffsetY(), r, Path.Direction.CW);
+        if (FeatureFlags.FOLDER_BG_CIRCLE) {
+            mPath.addCircle(r + getOffsetX(), r + getOffsetY(), r, Path.Direction.CW);
+        } else {
+            RectF rectF = circleChangeRectf(r, r + getOffsetX(), r + getOffsetY());
+            mPath.addRect(rectF, Path.Direction.CW);
+        }
         return mPath;
     }
 
     // It is the callers responsibility to save and restore the canvas layers.
     void clipCanvasHardware(Canvas canvas) {
+        Log.i(TAG, "PreviewBackground-clipCanvasHardware: ");
         mPaint.setColor(Color.BLACK);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setXfermode(mClipPorterDuffXfermode);

@@ -45,8 +45,14 @@ public class WidgetHostViewLoader implements DragController.DragListener {
         mInfo = (PendingAddWidgetInfo) view.getTag();
     }
 
+    /**
+     * 开始拖动；由于之前注册了接口 addDragListener
+     * @param dragObject The object being dragged
+     * @param options Options used to start the drag
+     */
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+        //拖动桌面icon时没有调用它
         preloadWidget();
     }
 

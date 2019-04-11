@@ -53,6 +53,7 @@ import com.android.launcher3.accessibility.WorkspaceAccessibilityHelper;
 import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.anim.PropertyListBuilder;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.folder.PreviewBackground;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.util.CellAndSpan;
@@ -74,7 +75,8 @@ public class CellLayout extends ViewGroup {
     public static final int WORKSPACE_ACCESSIBILITY_DRAG = 2;
     public static final int FOLDER_ACCESSIBILITY_DRAG = 1;
 
-    private static final String TAG = "CellLayout";
+    //    private static final String TAG = "CellLayout";
+    private static final String TAG = TagConfig.TAG;
     private static final boolean LOGD = false;
 
     private final Launcher mLauncher;
@@ -206,7 +208,10 @@ public class CellLayout extends ViewGroup {
 
         // A ViewGroup usually does not draw, but CellLayout needs to draw a rectangle to show
         // the user where a dragged item will land when dropped.
+        //ViewGroup通常不会绘制，但是CellLayout需要绘制一个矩形来显示拖动项目在放置时落地的用户。
+        //设置此方法才可以绘制 ViewGroup
         setWillNotDraw(false);
+        //设置为false；活动的时候忽略xml文件中设置的padding
         setClipToPadding(false);
         mLauncher = Launcher.getLauncher(context);
 
@@ -225,17 +230,19 @@ public class CellLayout extends ViewGroup {
 
         mFolderLeaveBehind.delegateCellX = -1;
         mFolderLeaveBehind.delegateCellY = -1;
-
+        //对于透明的图片和没有贴图的地方，显示桌面背景图片
         setAlwaysDrawnWithCacheEnabled(false);
         final Resources res = getResources();
 
         mBackground = res.getDrawable(R.drawable.bg_celllayout);
         mBackground.setCallback(this);
+        //指定drawable的alpha值。 0表示完全透明，* 255表示完全不透明。
         mBackground.setAlpha(0);
 
         mReorderPreviewAnimationMagnitude = (REORDER_PREVIEW_MAGNITUDE * grid.iconSizePx);
 
         // Initialize the data structures used for the drag visualization.
+        //初始化用于拖动可视化的数据结构
         mEaseOutInterpolator = Interpolators.DEACCEL_2_5; // Quint ease out
         mDragCell[0] = mDragCell[1] = -1;
         for (int i = 0; i < mDragOutlines.length; i++) {
@@ -250,7 +257,7 @@ public class CellLayout extends ViewGroup {
         final int duration = res.getInteger(R.integer.config_dragOutlineFadeTime);
         final float fromAlphaValue = 0;
         final float toAlphaValue = (float) res.getInteger(R.integer.config_dragOutlineMaxAlpha);
-
+        //将指定的 float 值分配给指定 float 型数组的每个元素。
         Arrays.fill(mDragOutlineAlphas, fromAlphaValue);
 
         for (int i = 0; i < mDragOutlineAnims.length; i++) {
@@ -391,7 +398,13 @@ public class CellLayout extends ViewGroup {
         return mDropPending;
     }
 
+    /**
+     * 猜测这个是拖动时最外面的框;参数为true时显示
+     *
+     * @param isDragOverlapping
+     */
     void setIsDragOverlapping(boolean isDragOverlapping) {
+        Log.i(TAG, "CellLayout-setIsDragOverlapping: isDragOverlapping=" + isDragOverlapping);
         if (mIsDragOverlapping != isDragOverlapping) {
             mIsDragOverlapping = isDragOverlapping;
             mBackground.setState(mIsDragOverlapping
@@ -428,12 +441,14 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        Log.i(TAG, "CellLayout-onDraw: ");
         // When we're large, we are either drawn in a "hover" state (ie when dragging an item to
         // a neighboring page) or with just a normal background (if backgroundAlpha > 0.0f)
         // When we're small, we are either drawn normally or in the "accepts drops" state (during
         // a drag). However, we also drag the mini hover background *over* one of those two
         // backgrounds
         if (mBackground.getAlpha() > 0) {
+            // TODO: 2019/4/9  此处为绘制拖动图标时的绘制边框(将此处注掉将不绘制边框)
             mBackground.draw(canvas);
         }
 
@@ -443,6 +458,7 @@ public class CellLayout extends ViewGroup {
             if (alpha > 0) {
                 final Bitmap b = (Bitmap) mDragOutlineAnims[i].getTag();
                 paint.setAlpha((int) (alpha + .5f));
+                //src为空表示整个位图；dst 表示目标位图占地；
                 canvas.drawBitmap(b, null, mDragOutlines[i], paint);
             }
         }
@@ -455,9 +471,12 @@ public class CellLayout extends ViewGroup {
                 for (int j = 0; j < mCountY; j++) {
                     if (mOccupied.cells[i][j]) {
                         cellToPoint(i, j, pt);
+                        //锁画布(为了保存之前的画布状态)
                         canvas.save();
+                        //把当前画布的原点移到(pt[0],pt[1]),后面的操作都以(pt[0],pt[1])作为参照点，默认原点为(0,0)
                         canvas.translate(pt[0], pt[1]);
                         cd.draw(canvas);
+                        //把当前画布返回（调整）到上一个save()状态之前
                         canvas.restore();
                     }
                 }
@@ -763,6 +782,7 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.i(TAG, "CellLayout-onMeasure: ");
         int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -803,6 +823,7 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        Log.i(TAG, "CellLayout-onLayout: ");
         int left = getPaddingLeft();
         left += (int) Math.ceil(getUnusedHorizontalSpace() / 2f);
         int right = r - l - getPaddingRight();
@@ -2517,6 +2538,7 @@ public class CellLayout extends ViewGroup {
 
     /**
      * 将单元格标记为占用视图
+     *
      * @param view
      */
     public void markCellsAsOccupiedForView(View view) {

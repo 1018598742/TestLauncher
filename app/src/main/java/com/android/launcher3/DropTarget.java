@@ -24,6 +24,7 @@ import com.android.launcher3.dragndrop.DragView;
 
 /**
  * Interface defining an object that can receive a drag.
+ * 定义可以接收拖动的对象的接口。
  *
  */
 public interface DropTarget {
@@ -96,8 +97,9 @@ public interface DropTarget {
 
     /**
      * Used to temporarily disable certain drop targets
+     * 用于暂时禁用某些放置目标
      *
-     * @return boolean specifying whether this drop target is currently enabled
+     * @return boolean specifying whether this drop target is currently enabled 指定当前是否启用此放置目标
      */
     boolean isDropEnabled();
 

@@ -16,28 +16,30 @@
 
 package com.android.launcher3.dragndrop;
 
-import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
-import static com.android.launcher3.LauncherState.NORMAL;
-
 import android.content.ComponentName;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.launcher3.DeleteDropTarget;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.ItemInfo;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.accessibility.DragViewStateAnnouncer;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.TouchController;
@@ -45,13 +47,18 @@ import com.android.launcher3.util.UiThreadHelper;
 
 import java.util.ArrayList;
 
+import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
+import static com.android.launcher3.LauncherState.NORMAL;
+
 /**
  * Class for initiating a drag within a view or across multiple views.
  */
 public class DragController implements DragDriver.EventListener, TouchController {
     private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
+    private static final String TAG = TagConfig.TAG;
 
-    @Thunk Launcher mLauncher;
+    @Thunk
+    Launcher mLauncher;
     private FlingToDeleteHelper mFlingToDeleteHelper;
 
     // temporaries to avoid gc thrash
@@ -64,31 +71,44 @@ public class DragController implements DragDriver.EventListener, TouchController
      */
     private DragDriver mDragDriver = null;
 
-    /** Options controlling the drag behavior. */
+    /**
+     * Options controlling the drag behavior.
+     */
     private DragOptions mOptions;
 
-    /** X coordinate of the down event. */
+    /**
+     * X coordinate of the down event.
+     */
     private int mMotionDownX;
 
-    /** Y coordinate of the down event. */
+    /**
+     * Y coordinate of the down event.
+     */
     private int mMotionDownY;
 
     private DropTarget.DragObject mDragObject;
 
-    /** Who can receive drop events */
+    /**
+     * Who can receive drop events
+     */
     private ArrayList<DropTarget> mDropTargets = new ArrayList<>();
     private ArrayList<DragListener> mListeners = new ArrayList<>();
 
-    /** The window token used as the parent for the DragView. */
+    /**
+     * The window token used as the parent for the DragView.
+     */
     private IBinder mWindowToken;
 
     private View mMoveTarget;
 
     private DropTarget mLastDropTarget;
 
-    @Thunk int mLastTouch[] = new int[2];
-    @Thunk long mLastTouchUpTime = -1;
-    @Thunk int mDistanceSinceScroll = 0;
+    @Thunk
+    int mLastTouch[] = new int[2];
+    @Thunk
+    long mLastTouchUpTime = -1;
+    @Thunk
+    int mDistanceSinceScroll = 0;
 
     private int mTmpPoint[] = new int[2];
     private Rect mDragLayerRect = new Rect();
@@ -103,7 +123,7 @@ public class DragController implements DragDriver.EventListener, TouchController
          * A drag has begun
          *
          * @param dragObject The object being dragged
-         * @param options Options used to start the drag
+         * @param options    Options used to start the drag
          */
         void onDragStart(DropTarget.DragObject dragObject, DragOptions options);
 
@@ -126,24 +146,28 @@ public class DragController implements DragDriver.EventListener, TouchController
      * When the drag is started, the UI automatically goes into spring loaded mode. On a successful
      * drop, it is the responsibility of the {@link DropTarget} to exit out of the spring loaded
      * mode. If the drop was cancelled for some reason, the UI will automatically exit out of this mode.
+     * 当拖动开始时，UI自动进入弹簧加载模式。成功*删除后，{@link DropTarget}有责任退出弹簧加载*模式。如果由于某种原因取消了放置，UI将自动退出此模式
      *
-     * @param b The bitmap to display as the drag image.  It will be re-scaled to the
-     *          enlarged size.
-     * @param dragLayerX The x position in the DragLayer of the left-top of the bitmap.
-     * @param dragLayerY The y position in the DragLayer of the left-top of the bitmap.
-     * @param source An object representing where the drag originated
-     * @param dragInfo The data associated with the object that is being dragged
-     * @param dragRegion Coordinates within the bitmap b for the position of item being dragged.
-     *          Makes dragging feel more precise, e.g. you can clip out a transparent border
+     * @param b          The bitmap to display as the drag image.  It will be re-scaled to the
+     *                   enlarged size.//要显示为拖动图像的位图。它将被重新缩放到*放大尺寸
+     * @param dragLayerX The x position in the DragLayer of the left-top of the bitmap.位图左上角的DragLayer中的x位置。
+     * @param dragLayerY The y position in the DragLayer of the left-top of the bitmap.位图左上角的DragLayer中的y位置。
+     * @param source     An object representing where the drag originated 表示拖动源自的位置的对象
+     * @param dragInfo   The data associated with the object that is being dragged 与正在拖动的对象关联的数据
+     * @param dragRegion Coordinates within the bitmap b for the position of item being dragged. 位图b内的坐标，用于拖动项目的位置。
+     *                   Makes dragging feel more precise, e.g. you can clip out a transparent border
+     *                   <p>
+     *                   开始拖动
      */
     public DragView startDrag(Bitmap b, int dragLayerX, int dragLayerY,
-            DragSource source, ItemInfo dragInfo, Point dragOffset, Rect dragRegion,
-            float initialDragViewScale, float dragViewScaleOnDrop, DragOptions options) {
+                              DragSource source, ItemInfo dragInfo, Point dragOffset, Rect dragRegion,
+                              float initialDragViewScale, float dragViewScaleOnDrop, DragOptions options) {
         if (PROFILE_DRAWING_DURING_DRAG) {
             android.os.Debug.startMethodTracing("Launcher");
         }
 
         // Hide soft keyboard, if visible
+        //隐藏软键盘
         UiThreadHelper.hideKeyboardAsync(mLauncher, mWindowToken);
 
         mOptions = options;
@@ -168,6 +192,7 @@ public class DragController implements DragDriver.EventListener, TouchController
         final Resources res = mLauncher.getResources();
         final float scaleDps = mIsInPreDrag
                 ? res.getDimensionPixelSize(R.dimen.pre_drag_view_scale) : 0f;
+        //初始化拖动视图
         final DragView dragView = mDragObject.dragView = new DragView(mLauncher, b, registrationX,
                 registrationY, initialDragViewScale, dragViewScaleOnDrop, scaleDps);
         dragView.setItemInfo(dragInfo);
@@ -182,6 +207,7 @@ public class DragController implements DragDriver.EventListener, TouchController
             mDragObject.yOffset = mMotionDownY - (dragLayerY + dragRegionTop);
             mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
 
+            //桌面图标拖动时初始化拖动驱动
             mDragDriver = DragDriver.create(mLauncher, this, mDragObject, mOptions);
         }
 
@@ -209,6 +235,8 @@ public class DragController implements DragDriver.EventListener, TouchController
 
         mLastTouch[0] = mMotionDownX;
         mLastTouch[1] = mMotionDownY;
+        //
+        Log.i(TAG, "DragController-startDrag: ");
         handleMoveEvent(mMotionDownX, mMotionDownY);
         mLauncher.getUserEventDispatcher().resetActionDurationMillis();
         return dragView;
@@ -226,7 +254,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     /**
      * Call this from a drag source view like this:
-     *
+     * <p>
      * <pre>
      *  @Override
      *  public boolean dispatchKeyEvent(KeyEvent event) {
@@ -308,7 +336,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     public void animateDragViewToOriginalPosition(final Runnable onComplete,
-            final View originalIcon, int duration) {
+                                                  final View originalIcon, int duration) {
         Runnable onCompleteRunnable = new Runnable() {
             @Override
             public void run() {
@@ -406,6 +434,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     /**
      * Call this from a drag source view.
      */
+    @Override
     public boolean onControllerInterceptTouchEvent(MotionEvent ev) {
         if (mOptions != null && mOptions.isAccessibleDrag) {
             return false;
@@ -494,12 +523,19 @@ public class DragController implements DragDriver.EventListener, TouchController
         checkTouchMove(dropTarget);
     }
 
+    /**
+     * 从此进入显示框 并且 dropTarget 不为空
+     * 上一个 DropTarget 跟设置这个不是一个
+     * 开始拖动的是否 mLastDropTarget 设置为 null
+     * @param dropTarget
+     */
     private void checkTouchMove(DropTarget dropTarget) {
         if (dropTarget != null) {
             if (mLastDropTarget != dropTarget) {
                 if (mLastDropTarget != null) {
                     mLastDropTarget.onDragExit(mDragObject);
                 }
+                Log.i(TAG, "DragController-checkTouchMove: ");
                 dropTarget.onDragEnter(mDragObject);
             }
             dropTarget.onDragOver(mDragObject);
@@ -514,6 +550,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     /**
      * Call this from a drag source view.
      */
+    @Override
     public boolean onControllerTouchEvent(MotionEvent ev) {
         if (mDragDriver == null || mOptions == null || mOptions.isAccessibleDrag) {
             return false;
@@ -578,6 +615,7 @@ public class DragController implements DragDriver.EventListener, TouchController
             }
             mLastDropTarget = dropTarget;
             if (dropTarget != null) {
+                Log.i(TAG, "DragController-drop: ");
                 dropTarget.onDragEnter(mDragObject);
             }
         }
@@ -601,11 +639,27 @@ public class DragController implements DragDriver.EventListener, TouchController
                     dropTarget.onDrop(mDragObject, mOptions);
                 }
                 accepted = true;
+
+                // TODO: 2019/4/10 拖动移除功能改为卸载
+                if (FeatureFlags.REMOVE_DRAWER && dropTarget instanceof DeleteDropTarget &&
+                        isNeedCancelDrag(mDragObject.dragInfo)) {
+                    cancelDrag();
+                }
             }
         }
         final View dropTargetAsView = dropTarget instanceof View ? (View) dropTarget : null;
         mLauncher.getUserEventDispatcher().logDragNDrop(mDragObject, dropTargetAsView);
         dispatchDropComplete(dropTargetAsView, accepted);
+    }
+
+    /**
+     * 判断是否可以取消
+     * @param item
+     * @return
+     */
+    private boolean isNeedCancelDrag(ItemInfo item){
+        return (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+                item.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER);
     }
 
     private DropTarget findDropTarget(int x, int y, int[] dropCoordinates) {
@@ -643,6 +697,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     /**
      * Sets the drag listener which will be notified when a drag starts or ends.
+     * 设置拖动开始或结束时将通知的拖动侦听器。
      */
     public void addDragListener(DragListener l) {
         mListeners.add(l);
@@ -657,6 +712,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     /**
      * Add a DropTarget to the list of potential places to receive drop events.
+     * 将DropTarget添加到接收放置事件的潜在位置列表中。
      */
     public void addDropTarget(DropTarget target) {
         mDropTargets.add(target);

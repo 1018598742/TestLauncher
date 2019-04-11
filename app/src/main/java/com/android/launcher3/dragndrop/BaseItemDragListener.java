@@ -88,6 +88,12 @@ public abstract class BaseItemDragListener extends InternalStateHandler implemen
         return false;
     }
 
+    /**
+     * 拖动监听类
+     * @param view
+     * @param event
+     * @return
+     */
     @Override
     public boolean onDrag(View view, DragEvent event) {
         if (mLauncher == null || mDragController == null) {

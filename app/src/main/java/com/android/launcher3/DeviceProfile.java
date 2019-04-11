@@ -32,6 +32,9 @@ import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.badge.BadgeRenderer;
 import com.android.launcher3.graphics.IconNormalizer;
 
+/**
+ * 设备配置文件
+ */
 public class DeviceProfile {
 
     public final InvariantDeviceProfile inv;

@@ -31,6 +31,7 @@ import com.android.launcher3.graphics.ShadowGenerator;
 
 /**
  * Contains parameters necessary to draw a badge for an icon (e.g. the size of the badge).
+ * 包含绘制图标徽章所需的参数（例如徽章的大小）
  * @see BadgeInfo for the data to draw
  */
 public class BadgeRenderer {

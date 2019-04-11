@@ -99,9 +99,10 @@ public class StylusEventHelper {
      * pressed.
      *
      * @param event The event to check.
-     * @return Whether a stylus button press occurred.
+     * @return Whether a stylus button press occurred. 是否发生了手写笔按钮按下。
      */
     private static boolean isStylusButtonPressed(MotionEvent event) {
+        //getToolType 使用什么触摸的；TOOL_TYPE_STYLUS手写笔；
         return event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                 && ((event.getButtonState() & MotionEvent.BUTTON_SECONDARY)
                         == MotionEvent.BUTTON_SECONDARY);

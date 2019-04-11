@@ -40,6 +40,7 @@ public class BitmapRenderer {
           }
 
           Picture picture = new Picture();
+          //开始录制，在返回的Canvas上进行绘制
           renderer.draw(picture.beginRecording(width, height));
           picture.endRecording();
           return Bitmap.createBitmap(picture);

@@ -18,29 +18,31 @@ package com.android.launcher3.config;
 
 /**
  * Defines a set of flags used to control various launcher behaviors.
- *
+ * <p>
  * All the flags should be defined here with appropriate default values. To override a value,
  * redefine it in {@link FeatureFlags}.
- *
+ * <p>
  * This class is kept package-private to prevent direct access.
  */
 abstract class BaseFlags {
 
-    BaseFlags() {}
+    BaseFlags() {
+    }
 
-    // TODO: 2019/4/3
-    public static final boolean IS_DOGFOOD_BUILD = true;
+    public static final boolean IS_DOGFOOD_BUILD = false;
     public static final String AUTHORITY = "com.android.launcher3.settings".intern();
 
     // When enabled allows to use any point on the fast scrollbar to start dragging.
     public static final boolean LAUNCHER3_DIRECT_SCROLL = true;
     // When enabled the promise icon is visible in all apps while installation an app.
+    //启用后，在安装应用程序时，所有应用程序中都会显示承诺图标。
     public static final boolean LAUNCHER3_PROMISE_APPS_IN_ALL_APPS = false;
     // When enabled allows use of spring motions on the icons.
     public static final boolean LAUNCHER3_SPRING_ICONS = true;
 
     // Feature flag to enable moving the QSB on the 0th screen of the workspace.
-    public static final boolean QSB_ON_FIRST_SCREEN = true;
+    //第一页搜索是否可用
+    public static final boolean QSB_ON_FIRST_SCREEN = false;
     // When enabled the all-apps icon is not added to the hotseat.
     public static final boolean NO_ALL_APPS_ICON = true;
 
@@ -56,4 +58,18 @@ abstract class BaseFlags {
     // When true, overview shows screenshots in the orientation they were taken rather than
     // trying to make them fit the orientation the device is in.
     public static final boolean OVERVIEW_USE_SCREENSHOT_ORIENTATION = true;
+
+    /**
+     * 文件夹是否圆形显示标志位
+     * <p>true</p>为文件夹圆形显示
+     * <p>false</p>为文件夹矩形显示
+     */
+    public static final boolean FOLDER_BG_CIRCLE = true;
+
+    /**
+     * 是否显示上拉全部数据的窗口
+     * <p>true</p>为不显示
+     * <p>false</p>为显示
+     */
+    public static final boolean REMOVE_DRAWER = true;
 }

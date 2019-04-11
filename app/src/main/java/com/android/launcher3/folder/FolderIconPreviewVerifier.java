@@ -23,6 +23,7 @@ import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_I
 
 /**
  * Verifies whether an item in a Folder is displayed in the FolderIcon preview.
+ * 验证FolderIcon预览中是否显示文件夹中的项目
  */
 public class FolderIconPreviewVerifier {
 

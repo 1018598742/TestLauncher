@@ -26,12 +26,14 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.util.UiThreadHelper;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
@@ -40,9 +42,11 @@ import java.nio.ByteBuffer;
 
 /**
  * A utility class to generate preview bitmap for dragging.
+ * 用于生成用于拖动的预览位图的实用程序类。
  */
 public class DragPreviewProvider {
 
+    private static final String TAG = TagConfig.TAG;
     private final Rect mTempRect = new Rect();
 
     protected final View mView;
@@ -61,6 +65,7 @@ public class DragPreviewProvider {
 
     public DragPreviewProvider(View view, Context context) {
         mView = view;
+        //getDimension 返回精确的像素单位数值；getDimensionPixelSize返回四舍五入的像素单位数值；getDimensionPixelOffset返回整数部分的像素单位数值。
         blurSizeOutline =
                 context.getResources().getDimensionPixelSize(R.dimen.blur_size_medium_outline);
 
@@ -71,6 +76,7 @@ public class DragPreviewProvider {
         } else {
             previewPadding = blurSizeOutline;
         }
+        Log.i(TAG, "DragPreviewProvider-DragPreviewProvider: blurSizeOutline=" + blurSizeOutline + "=previewPadding=" + previewPadding);
     }
 
     /**
@@ -131,12 +137,25 @@ public class DragPreviewProvider {
             height = (int) (mView.getHeight() * scale);
 
             // Use software renderer for widgets as we know that they already work
-            return BitmapRenderer.createSoftwareBitmap(width + blurSizeOutline,
-                    height + blurSizeOutline, (c) -> drawDragView(c, scale));
+//            return BitmapRenderer.createSoftwareBitmap(width + blurSizeOutline,
+//                    height + blurSizeOutline, (c) -> drawDragView(c, scale));
+            return BitmapRenderer.createSoftwareBitmap(width + blurSizeOutline, height + blurSizeOutline, new BitmapRenderer.Renderer() {
+                @Override
+                public void draw(Canvas out) {
+                    drawDragView(out,scale);
+                }
+            });
         }
 
-        return BitmapRenderer.createHardwareBitmap(width + blurSizeOutline,
-                height + blurSizeOutline, (c) -> drawDragView(c, 1));
+//        return BitmapRenderer.createHardwareBitmap(width + blurSizeOutline,
+//                height + blurSizeOutline, (c) -> drawDragView(c, 1));
+        return BitmapRenderer.createHardwareBitmap(width + blurSizeOutline, height + blurSizeOutline,
+                new BitmapRenderer.Renderer() {
+                    @Override
+                    public void draw(Canvas out) {
+                         drawDragView(out,1);
+                    }
+                });
     }
 
     public final void generateDragOutline(Bitmap preview) {

@@ -16,6 +16,7 @@
 package com.android.launcher3.model;
 
 import android.os.UserHandle;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 
 import com.android.launcher3.AllAppsList;
@@ -83,10 +84,19 @@ public abstract class BaseModelUpdateTask implements ModelUpdateTask {
      */
     public final void scheduleCallbackTask(final CallbackTask task) {
         final Callbacks callbacks = mModel.getCallback();
-        mUiExecutor.execute(() -> {
-            Callbacks cb = mModel.getCallback();
-            if (callbacks == cb && cb != null) {
-                task.execute(callbacks);
+//        mUiExecutor.execute(() -> {
+//            Callbacks cb = mModel.getCallback();
+//            if (callbacks == cb && cb != null) {
+//                task.execute(callbacks);
+//            }
+//        });
+        mUiExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Callbacks cb = mModel.getCallback();
+                if (callbacks == cb && cb != null){
+                    task.execute(callbacks);
+                }
             }
         });
     }

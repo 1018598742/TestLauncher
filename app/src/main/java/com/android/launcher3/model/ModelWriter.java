@@ -35,7 +35,6 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.LauncherSettings.Settings;
 import com.android.launcher3.ShortcutInfo;
-import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.util.ContentWriter;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LooperExecutor;
@@ -46,6 +45,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Class for handling model updates.
+ * 用于处理模型更新的类
  */
 public class ModelWriter {
 
@@ -61,7 +61,7 @@ public class ModelWriter {
     private final boolean mVerifyChanges;
 
     public ModelWriter(Context context, LauncherModel model, BgDataModel dataModel,
-            boolean hasVerticalHotseat, boolean verifyChanges) {
+                       boolean hasVerticalHotseat, boolean verifyChanges) {
         mContext = context;
         mModel = model;
         mBgDataModel = dataModel;
@@ -91,7 +91,7 @@ public class ModelWriter {
      * <container, screen, cellX, cellY>
      */
     public void addOrMoveItemInDatabase(ItemInfo item,
-            long container, long screenId, int cellX, int cellY) {
+                                        long container, long screenId, int cellX, int cellY) {
         if (item.container == ItemInfo.NO_ID) {
             // From all apps
             addItemToDatabase(item, container, screenId, cellX, cellY);
@@ -142,7 +142,7 @@ public class ModelWriter {
      * Move an item in the DB to a new <container, screen, cellX, cellY>
      */
     public void moveItemInDatabase(final ItemInfo item,
-            long container, long screenId, int cellX, int cellY) {
+                                   long container, long screenId, int cellX, int cellY) {
         updateItemInfoProps(item, container, screenId, cellX, cellY);
 
         final ContentWriter writer = new ContentWriter(mContext)
@@ -183,7 +183,7 @@ public class ModelWriter {
      * Move and/or resize item in the DB to a new <container, screen, cellX, cellY, spanX, spanY>
      */
     public void modifyItemInDatabase(final ItemInfo item,
-            long container, long screenId, int cellX, int cellY, int spanX, int spanY) {
+                                     long container, long screenId, int cellX, int cellY, int spanX, int spanY) {
         updateItemInfoProps(item, container, screenId, cellX, cellY);
         item.spanX = spanX;
         item.spanY = spanY;
@@ -214,7 +214,7 @@ public class ModelWriter {
      * cellY fields of the item. Also assigns an ID to the item.
      */
     public void addItemToDatabase(final ItemInfo item,
-            long container, long screenId, int cellX, int cellY) {
+                                  long container, long screenId, int cellX, int cellY) {
         updateItemInfoProps(item, container, screenId, cellX, cellY);
 
         final ContentWriter writer = new ContentWriter(mContext);
@@ -227,13 +227,25 @@ public class ModelWriter {
         ModelVerifier verifier = new ModelVerifier();
 
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        mWorkerExecutor.execute(() -> {
-            cr.insert(Favorites.CONTENT_URI, writer.getValues(mContext));
+//        mWorkerExecutor.execute(() -> {
+//            cr.insert(Favorites.CONTENT_URI, writer.getValues(mContext));
+//
+//            synchronized (mBgDataModel) {
+//                checkItemInfoLocked(item.id, item, stackTrace);
+//                mBgDataModel.addItem(mContext, item, true);
+//                verifier.verifyModel();
+//            }
+//        });
 
-            synchronized (mBgDataModel) {
-                checkItemInfoLocked(item.id, item, stackTrace);
-                mBgDataModel.addItem(mContext, item, true);
-                verifier.verifyModel();
+        mWorkerExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                cr.insert(Favorites.CONTENT_URI, writer.getValues(mContext));
+                synchronized (mBgDataModel) {
+                    checkItemInfoLocked(item.id, item, stackTrace);
+                    mBgDataModel.addItem(mContext, item, true);
+                    verifier.verifyModel();
+                }
             }
         });
     }
@@ -258,13 +270,25 @@ public class ModelWriter {
     public void deleteItemsFromDatabase(final Iterable<? extends ItemInfo> items) {
         ModelVerifier verifier = new ModelVerifier();
 
-        mWorkerExecutor.execute(() -> {
-            for (ItemInfo item : items) {
-                final Uri uri = Favorites.getContentUri(item.id);
-                mContext.getContentResolver().delete(uri, null, null);
+//        mWorkerExecutor.execute(() -> {
+//            for (ItemInfo item : items) {
+//                final Uri uri = Favorites.getContentUri(item.id);
+//                mContext.getContentResolver().delete(uri, null, null);
+//
+//                mBgDataModel.removeItem(mContext, item);
+//                verifier.verifyModel();
+//            }
+//        });
+        mWorkerExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (ItemInfo item : items) {
+                    final Uri uri = Favorites.getContentUri(item.id);
+                    mContext.getContentResolver().delete(uri, null, null);
 
-                mBgDataModel.removeItem(mContext, item);
-                verifier.verifyModel();
+                    mBgDataModel.removeItem(mContext, item);
+                    verifier.verifyModel();
+                }
             }
         });
     }
@@ -275,16 +299,30 @@ public class ModelWriter {
     public void deleteFolderAndContentsFromDatabase(final FolderInfo info) {
         ModelVerifier verifier = new ModelVerifier();
 
-        mWorkerExecutor.execute(() -> {
-            ContentResolver cr = mContext.getContentResolver();
-            cr.delete(LauncherSettings.Favorites.CONTENT_URI,
-                    LauncherSettings.Favorites.CONTAINER + "=" + info.id, null);
-            mBgDataModel.removeItem(mContext, info.contents);
-            info.contents.clear();
+//        mWorkerExecutor.execute(() -> {
+//            ContentResolver cr = mContext.getContentResolver();
+//            cr.delete(LauncherSettings.Favorites.CONTENT_URI,
+//                    LauncherSettings.Favorites.CONTAINER + "=" + info.id, null);
+//            mBgDataModel.removeItem(mContext, info.contents);
+//            info.contents.clear();
+//
+//            cr.delete(LauncherSettings.Favorites.getContentUri(info.id), null, null);
+//            mBgDataModel.removeItem(mContext, info);
+//            verifier.verifyModel();
+//        });
+        mWorkerExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                ContentResolver cr = mContext.getContentResolver();
+                cr.delete(LauncherSettings.Favorites.CONTENT_URI,
+                        LauncherSettings.Favorites.CONTAINER + "=" + info.id, null);
+                mBgDataModel.removeItem(mContext, info.contents);
+                info.contents.clear();
 
-            cr.delete(LauncherSettings.Favorites.getContentUri(info.id), null, null);
-            mBgDataModel.removeItem(mContext, info);
-            verifier.verifyModel();
+                cr.delete(LauncherSettings.Favorites.getContentUri(info.id), null, null);
+                mBgDataModel.removeItem(mContext, info);
+                verifier.verifyModel();
+            }
         });
     }
 
@@ -407,20 +445,39 @@ public class ModelWriter {
 
             int executeId = mBgDataModel.lastBindId;
 
-            mUiHandler.post(() -> {
-                int currentId = mBgDataModel.lastBindId;
-                if (currentId > executeId) {
-                    // Model was already bound after job was executed.
-                    return;
-                }
-                if (executeId == startId) {
-                    // Bound model has not changed during the job
-                    return;
-                }
-                // Bound model was changed between submitting the job and executing the job
-                Callbacks callbacks = mModel.getCallback();
-                if (callbacks != null) {
-                    callbacks.rebindModel();
+//            mUiHandler.post(() -> {
+//                int currentId = mBgDataModel.lastBindId;
+//                if (currentId > executeId) {
+//                    // Model was already bound after job was executed.
+//                    return;
+//                }
+//                if (executeId == startId) {
+//                    // Bound model has not changed during the job
+//                    return;
+//                }
+//                // Bound model was changed between submitting the job and executing the job
+//                Callbacks callbacks = mModel.getCallback();
+//                if (callbacks != null) {
+//                    callbacks.rebindModel();
+//                }
+//            });
+            mUiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    int currentId = mBgDataModel.lastBindId;
+                    if (currentId > executeId) {
+                        // Model was already bound after job was executed.
+                        return;
+                    }
+                    if (executeId == startId) {
+                        // Bound model has not changed during the job
+                        return;
+                    }
+                    // Bound model was changed between submitting the job and executing the job
+                    Callbacks callbacks = mModel.getCallback();
+                    if (callbacks != null) {
+                        callbacks.rebindModel();
+                    }
                 }
             });
         }

@@ -16,11 +16,6 @@
 
 package com.android.launcher3.allapps;
 
-import static com.android.launcher3.LauncherState.NORMAL;
-import static com.android.launcher3.LauncherState.OVERVIEW;
-import static com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType.HOTSEAT;
-import static com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType.PREDICTION;
-
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -33,6 +28,11 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.states.InternalStateHandler;
+
+import static com.android.launcher3.LauncherState.NORMAL;
+import static com.android.launcher3.LauncherState.OVERVIEW;
+import static com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType.HOTSEAT;
+import static com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType.PREDICTION;
 
 /**
  * Abstract base class of floating view responsible for showing discovery bounce animation
@@ -137,9 +137,9 @@ public class DiscoveryBounce extends AbstractFloatingView {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    showForHomeIfNeeded(launcher,false);
+                    showForHomeIfNeeded(launcher, false);
                 }
-            },DELAY_MS);
+            }, DELAY_MS);
             return;
         }
 
@@ -162,7 +162,13 @@ public class DiscoveryBounce extends AbstractFloatingView {
         }
 
         if (withDelay) {
-            new Handler().postDelayed(() -> showForOverviewIfNeeded(launcher, false), DELAY_MS);
+//            new Handler().postDelayed(() -> showForOverviewIfNeeded(launcher, false), DELAY_MS);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showForOverviewIfNeeded(launcher, false);
+                }
+            }, DELAY_MS);
             return;
         } else if (InternalStateHandler.hasPending()
                 || AbstractFloatingView.getTopOpenView(launcher) != null) {

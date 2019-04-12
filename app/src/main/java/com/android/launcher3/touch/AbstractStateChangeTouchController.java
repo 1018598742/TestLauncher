@@ -15,16 +15,6 @@
  */
 package com.android.launcher3.touch;
 
-import static com.android.launcher3.LauncherAnimUtils.MIN_PROGRESS_TO_ALL_APPS;
-import static com.android.launcher3.LauncherState.ALL_APPS;
-import static com.android.launcher3.LauncherState.NORMAL;
-import static com.android.launcher3.LauncherState.OVERVIEW;
-import static com.android.launcher3.LauncherStateManager.ANIM_ALL;
-import static com.android.launcher3.LauncherStateManager.ATOMIC_COMPONENT;
-import static com.android.launcher3.LauncherStateManager.NON_ATOMIC_COMPONENT;
-import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
-import static com.android.launcher3.anim.Interpolators.scrollInterpolatorForVelocity;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -49,6 +39,16 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.Action.Touch;
 import com.android.launcher3.util.FlingBlockCheck;
 import com.android.launcher3.util.PendingAnimation;
 import com.android.launcher3.util.TouchController;
+
+import static com.android.launcher3.LauncherAnimUtils.MIN_PROGRESS_TO_ALL_APPS;
+import static com.android.launcher3.LauncherState.ALL_APPS;
+import static com.android.launcher3.LauncherState.NORMAL;
+import static com.android.launcher3.LauncherState.OVERVIEW;
+import static com.android.launcher3.LauncherStateManager.ANIM_ALL;
+import static com.android.launcher3.LauncherStateManager.ATOMIC_COMPONENT;
+import static com.android.launcher3.LauncherStateManager.NON_ATOMIC_COMPONENT;
+import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
+import static com.android.launcher3.anim.Interpolators.scrollInterpolatorForVelocity;
 
 /**
  * TouchController for handling state changes
@@ -170,7 +170,7 @@ public abstract class AbstractStateChangeTouchController
      * that direction, returns fromState.
      */
     protected abstract LauncherState getTargetState(LauncherState fromState,
-            boolean isDragTowardPositive);
+                                                    boolean isDragTowardPositive);
 
     protected abstract float initCurrentAnimation(@AnimationComponents int animComponents);
 
@@ -231,7 +231,7 @@ public abstract class AbstractStateChangeTouchController
             mStartContainerType = LauncherLogProto.ContainerType.ALLAPPS;
         } else if (mStartState == NORMAL) {
             mStartContainerType = getLogContainerTypeForNormalState();
-        } else if (mStartState   == OVERVIEW){
+        } else if (mStartState == OVERVIEW) {
             mStartContainerType = LauncherLogProto.ContainerType.TASKSWITCHER;
         }
         if (mCurrentAnimation == null) {
@@ -295,7 +295,7 @@ public abstract class AbstractStateChangeTouchController
      * play the appropriate atomic animation if so.
      */
     private void maybeUpdateAtomicAnim(LauncherState fromState, LauncherState toState,
-            float progress) {
+                                       float progress) {
         if (!goingBetweenNormalAndOverview(fromState, toState)) {
             return;
         }
@@ -303,7 +303,7 @@ public abstract class AbstractStateChangeTouchController
                 : 1f - ATOMIC_OVERVIEW_ANIM_THRESHOLD;
         boolean passedThreshold = progress >= threshold;
         if (passedThreshold != mPassedOverviewAtomicThreshold) {
-            LauncherState atomicFromState = passedThreshold ? fromState: toState;
+            LauncherState atomicFromState = passedThreshold ? fromState : toState;
             LauncherState atomicToState = passedThreshold ? toState : fromState;
             mPassedOverviewAtomicThreshold = passedThreshold;
             if (mAtomicAnim != null) {
@@ -342,7 +342,7 @@ public abstract class AbstractStateChangeTouchController
     }
 
     private AnimatorSet createAtomicAnimForState(LauncherState fromState, LauncherState targetState,
-            long duration) {
+                                                 long duration) {
         AnimatorSetBuilder builder = getAnimatorSetBuilderForStates(fromState, targetState);
         mLauncher.getStateManager().prepareForAtomicAnimation(fromState, targetState, builder);
         AnimationConfig config = new AnimationConfig();
@@ -355,7 +355,7 @@ public abstract class AbstractStateChangeTouchController
     }
 
     protected AnimatorSetBuilder getAnimatorSetBuilderForStates(LauncherState fromState,
-            LauncherState toState) {
+                                                                LauncherState toState) {
         return new AnimatorSetBuilder();
     }
 
@@ -421,7 +421,14 @@ public abstract class AbstractStateChangeTouchController
             }
         }
 
-        mCurrentAnimation.setEndAction(() -> onSwipeInteractionCompleted(targetState, logAction));
+//        mCurrentAnimation.setEndAction(() -> onSwipeInteractionCompleted(targetState, logAction));
+        mCurrentAnimation.setEndAction(new Runnable() {
+            @Override
+            public void run() {
+                onSwipeInteractionCompleted(targetState, logAction);
+            }
+        });
+
         ValueAnimator anim = mCurrentAnimation.getAnimationPlayer();
         anim.setFloatValues(startProgress, endProgress);
         maybeUpdateAtomicAnim(mFromState, targetState, targetState == mToState ? 1f : 0f);
@@ -438,7 +445,7 @@ public abstract class AbstractStateChangeTouchController
 
     /**
      * Animates the atomic components from the current progress to the final progress.
-     *
+     * <p>
      * Note that this only applies when we are controlling the atomic components separately from
      * the non-atomic components, which only happens if we reinit before the atomic animation
      * finishes.
@@ -488,7 +495,7 @@ public abstract class AbstractStateChangeTouchController
     }
 
     protected void updateSwipeCompleteAnimation(ValueAnimator animator, long expectedDuration,
-            LauncherState targetState, float velocity, boolean isFling) {
+                                                LauncherState targetState, float velocity, boolean isFling) {
         animator.setDuration(expectedDuration)
                 .setInterpolator(scrollInterpolatorForVelocity(velocity));
     }

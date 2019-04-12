@@ -178,10 +178,17 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     mOpenCloseAnimator.removeListener(this);
                 }
             });
-            post(() -> {
-                mRecyclerView.setLayoutFrozen(true);
-                mOpenCloseAnimator.start();
-                mContent.animate().alpha(1).setDuration(FADE_IN_DURATION);
+//            post(() -> {
+//                mRecyclerView.setLayoutFrozen(true);
+//                mOpenCloseAnimator.start();
+//                mContent.animate().alpha(1).setDuration(FADE_IN_DURATION);
+//            });
+
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecyclerView.setLayoutFrozen(true);
+                }
             });
         } else {
             setTranslationShift(TRANSLATION_SHIFT_OPENED);

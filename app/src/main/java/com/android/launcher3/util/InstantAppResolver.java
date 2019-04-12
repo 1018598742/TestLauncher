@@ -30,6 +30,7 @@ import java.util.List;
 
 /**
  * A wrapper class to access instant app related APIs.
+ * 一个包装类，用于访问与应用程序相关的即时API。
  */
 public class InstantAppResolver {
 

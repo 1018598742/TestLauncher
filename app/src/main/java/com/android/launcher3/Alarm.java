@@ -19,6 +19,9 @@ package com.android.launcher3;
 import android.os.Handler;
 import android.os.SystemClock;
 
+/**
+ * 定时装置；在 setAlarm 时触发
+ */
 public class Alarm implements Runnable{
     // if we reach this time and the alarm hasn't been cancelled, call the listener
     private long mAlarmTriggerTime;
@@ -32,6 +35,7 @@ public class Alarm implements Runnable{
     private boolean mAlarmPending = false;
 
     public Alarm() {
+        //创建时在哪个线程实例的就在哪个线程
         mHandler = new Handler();
     }
 
@@ -41,6 +45,11 @@ public class Alarm implements Runnable{
 
     // Sets the alarm to go off in a certain number of milliseconds. If the alarm is already set,
     // it's overwritten and only the new alarm setting is used
+
+    /**
+     * 设置后延迟发送到 run
+     * @param millisecondsInFuture
+     */
     public void setAlarm(long millisecondsInFuture) {
         long currentTime = SystemClock.uptimeMillis();
         mAlarmPending = true;
@@ -63,6 +72,7 @@ public class Alarm implements Runnable{
     }
 
     // this is called when our timer runs out
+    @Override
     public void run() {
         mWaitingForCallback = false;
         if (mAlarmPending) {

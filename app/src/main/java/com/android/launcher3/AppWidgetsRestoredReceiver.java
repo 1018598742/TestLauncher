@@ -36,7 +36,7 @@ public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
             if (oldIds.length == newIds.length) {
                 final PendingResult asyncResult = goAsync();
                 new Handler(LauncherModel.getWorkerLooper())
-                        .postAtFrontOfQueue(new Runnable() {
+                        .postAtFrontOfQueue(new Runnable() {//发送消息到队列最前边(插队)
                             @Override
                             public void run() {
                                 restoreAppWidgetIds(context, oldIds, newIds);

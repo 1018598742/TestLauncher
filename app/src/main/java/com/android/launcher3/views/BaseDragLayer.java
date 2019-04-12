@@ -16,8 +16,6 @@
 
 package com.android.launcher3.views;
 
-import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -37,6 +35,8 @@ import com.android.launcher3.util.MultiValueAlpha.AlphaProperty;
 import com.android.launcher3.util.TouchController;
 
 import java.util.ArrayList;
+
+import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
 
 /**
  * A viewgroup with utility methods for drag-n-drop and touch interception
@@ -139,10 +139,19 @@ public abstract class BaseDragLayer<T extends BaseDraggingActivity> extends Inse
         if (child instanceof AbstractFloatingView) {
             // Handles the case where the view is removed without being properly closed.
             // This can happen if something goes wrong during a state change/transition.
-            postDelayed(() -> {
-                AbstractFloatingView floatingView = (AbstractFloatingView) child;
-                if (floatingView.isOpen()) {
-                    floatingView.close(false);
+//            postDelayed(() -> {
+//                AbstractFloatingView floatingView = (AbstractFloatingView) child;
+//                if (floatingView.isOpen()) {
+//                    floatingView.close(false);
+//                }
+//            }, SINGLE_FRAME_MS);
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    AbstractFloatingView floatingView = (AbstractFloatingView) child;
+                    if (floatingView.isOpen()) {
+                        floatingView.close(false);
+                    }
                 }
             }, SINGLE_FRAME_MS);
         }
@@ -170,7 +179,7 @@ public abstract class BaseDragLayer<T extends BaseDraggingActivity> extends Inse
      * Determine the rect of the descendant in this DragLayer's coordinates
      *
      * @param descendant The descendant whose coordinates we want to find.
-     * @param r The rect into which to place the results.
+     * @param r          The rect into which to place the results.
      * @return The factor by which this descendant is scaled relative to this DragLayer.
      */
     public float getDescendantRectRelativeToSelf(View descendant, Rect r) {
@@ -198,16 +207,16 @@ public abstract class BaseDragLayer<T extends BaseDraggingActivity> extends Inse
      * Given a coordinate relative to the descendant, find the coordinate in this DragLayer's
      * coordinates.
      *
-     * @param descendant The descendant to which the passed coordinate is relative.
-     * @param coord The coordinate that we want mapped.
+     * @param descendant        The descendant to which the passed coordinate is relative.
+     * @param coord             The coordinate that we want mapped.
      * @param includeRootScroll Whether or not to account for the scroll of the root descendant:
-     *          sometimes this is relevant as in a child's coordinates within the root descendant.
+     *                          sometimes this is relevant as in a child's coordinates within the root descendant.
      * @return The factor by which this descendant is scaled relative to this DragLayer. Caution
-     *         this scale factor is assumed to be equal in X and Y, and so if at any point this
-     *         assumption fails, we will need to return a pair of scale factors.
+     * this scale factor is assumed to be equal in X and Y, and so if at any point this
+     * assumption fails, we will need to return a pair of scale factors.
      */
     public float getDescendantCoordRelativeToSelf(View descendant, int[] coord,
-            boolean includeRootScroll) {
+                                                  boolean includeRootScroll) {
         return Utilities.getDescendantCoordRelativeToAncestor(descendant, this,
                 coord, includeRootScroll);
     }

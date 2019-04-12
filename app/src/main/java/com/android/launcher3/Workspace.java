@@ -1262,9 +1262,16 @@ public class Workspace extends PagedView<WorkspacePageIndicator>
         } else {
             // Chain the new callback onto the previous callback(s).
             Runnable oldCallback = mOnOverlayHiddenCallback;
-            mOnOverlayHiddenCallback = () -> {
-                oldCallback.run();
-                callback.run();
+//            mOnOverlayHiddenCallback = () -> {
+//                oldCallback.run();
+//                callback.run();
+//            };
+            mOnOverlayHiddenCallback = new Runnable() {
+                @Override
+                public void run() {
+                    oldCallback.run();
+                    callback.run();
+                }
             };
         }
         if (!tryRunOverlayCallback()) {

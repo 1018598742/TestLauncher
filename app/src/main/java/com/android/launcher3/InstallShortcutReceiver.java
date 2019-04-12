@@ -40,6 +40,7 @@ import android.util.Pair;
 
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.graphics.BitmapInfo;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.shortcuts.DeepShortcutManager;
@@ -62,6 +63,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 添加快捷方式的广播
+ */
 public class InstallShortcutReceiver extends BroadcastReceiver {
 
     private static final int MSG_ADD_TO_QUEUE = 1;
@@ -76,7 +80,8 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
     // processAllPendingInstalls() is called.
     private static int sInstallQueueDisabledFlags = 0;
 
-    private static final String TAG = "InstallShortcutReceiver";
+//    private static final String TAG = "InstallShortcutReceiver";
+    private static final String TAG = TagConfig.TAG;
     private static final boolean DBG = false;
 
     private static final String ACTION_INSTALL_SHORTCUT =
@@ -126,6 +131,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
                     ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
                     SharedPreferences prefs = Utilities.getPrefs(context);
                     Set<String> strings = prefs.getStringSet(APPS_PENDING_INSTALL, null);
+                    Log.i(TAG, "InstallShortcutReceiver-handleMessage: APPS_PENDING_INSTALL=" + strings);//null
                     if (DBG) Log.d(TAG, "Getting and clearing APPS_PENDING_INSTALL: " + strings);
                     if (strings == null) {
                         return;
@@ -160,7 +166,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
     };
 
     public static void removeFromInstallQueue(Context context, HashSet<String> packageNames,
-            UserHandle user) {
+                                              UserHandle user) {
         if (packageNames.isEmpty()) {
             return;
         }
@@ -297,6 +303,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         //运算规则：两个数都转为二进制，然后从高位开始比较，两个数只要有一个为1则为1，否则就为0。
         sInstallQueueDisabledFlags |= flag;
     }
+
     public static void disableAndFlushInstallQueue(int flag, Context context) {
         //位与运算符（&）
         //运算规则：两个数都转为二进制，然后从高位开始比较，如果两个数都为1则为1，否则为0。
@@ -317,7 +324,8 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
      * Ensures that we have a valid, non-null name.  If the provided name is null, we will return
      * the application name instead.
      */
-    @Thunk static CharSequence ensureValidName(Context context, Intent intent, CharSequence name) {
+    @Thunk
+    static CharSequence ensureValidName(Context context, Intent intent, CharSequence name) {
         if (name == null) {
             try {
                 PackageManager pm = context.getPackageManager();
@@ -415,12 +423,12 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
                     // If it a launcher target, we only need component name, and user to
                     // recreate this.
                     return new JSONStringer()
-                        .object()
-                        .key(LAUNCH_INTENT_KEY).value(launchIntent.toUri(0))
-                        .key(APP_SHORTCUT_TYPE_KEY).value(true)
-                        .key(USER_HANDLE_KEY).value(UserManagerCompat.getInstance(mContext)
-                                .getSerialNumberForUser(user))
-                        .endObject().toString();
+                            .object()
+                            .key(LAUNCH_INTENT_KEY).value(launchIntent.toUri(0))
+                            .key(APP_SHORTCUT_TYPE_KEY).value(true)
+                            .key(USER_HANDLE_KEY).value(UserManagerCompat.getInstance(mContext)
+                                    .getSerialNumberForUser(user))
+                            .endObject().toString();
                 } else if (shortcutInfo != null) {
                     // If it a launcher target, we only need component name, and user to
                     // recreate this.
@@ -457,13 +465,13 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
                 String name = ensureValidName(mContext, launchIntent, label).toString();
                 Bitmap icon = data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON);
                 Intent.ShortcutIconResource iconResource =
-                    data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE);
+                        data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE);
 
                 // Only encode the parameters which are supported by the API.
                 JSONStringer json = new JSONStringer()
-                    .object()
-                    .key(LAUNCH_INTENT_KEY).value(launchIntent.toUri(0))
-                    .key(NAME_KEY).value(name);
+                        .object()
+                        .key(LAUNCH_INTENT_KEY).value(launchIntent.toUri(0))
+                        .key(NAME_KEY).value(name);
                 if (icon != null) {
                     byte[] iconByteArray = Utilities.flattenBitmap(icon);
                     json = json.key(ICON_KEY).value(
@@ -581,7 +589,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
                 data.putExtra(Intent.EXTRA_SHORTCUT_ICON, b);
             } else if (iconResourceName != null && !iconResourceName.isEmpty()) {
                 Intent.ShortcutIconResource iconResource =
-                    new Intent.ShortcutIconResource();
+                        new Intent.ShortcutIconResource();
                 iconResource.resourceName = iconResourceName;
                 iconResource.packageName = iconResourcePackageName;
                 data.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconResource);
@@ -613,6 +621,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
     /**
      * Tries to create a new PendingInstallShortcutInfo which represents the same target,
      * but is an app target and not a shortcut.
+     *
      * @return the newly created info or the original one.
      */
     private static PendingInstallShortcutInfo convertToLauncherActivityIfPossible(

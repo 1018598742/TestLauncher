@@ -29,6 +29,7 @@ import java.lang.ref.WeakReference;
 
 /**
  * Utility class to sending state handling logic to Launcher from within the same process.
+ * 用于从同一进程内向Launcher发送状态处理逻辑的实用程序类
  *
  * Extending {@link Binder} ensures that the platform maintains a single instance of each object
  * which allows this object to safely navigate the system process.

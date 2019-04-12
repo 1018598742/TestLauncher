@@ -76,6 +76,7 @@ public class ConfigMonitor extends BroadcastReceiver implements DisplayListener 
     }
 
     public void register() {
+        //设备配置信息改变过滤广播
         mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
         mContext.getSystemService(DisplayManager.class)
                 .registerDisplayListener(this, new Handler(UiThreadHelper.getBackgroundLooper()));

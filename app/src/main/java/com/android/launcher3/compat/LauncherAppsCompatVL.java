@@ -129,6 +129,10 @@ public class LauncherAppsCompatVL extends LauncherAppsCompat {
         return mLauncherApps.isActivityEnabled(component, user);
     }
 
+    /**
+     * LauncherApps 回调的继承类
+     * 可以监听到应用的安装；卸载等信息
+     */
     private static class WrappedCallback extends LauncherApps.Callback {
         private final OnAppsChangedCallbackCompat mCallback;
 

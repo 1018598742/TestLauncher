@@ -339,9 +339,17 @@ public class DragLayer extends BaseDragLayer<Launcher> {
         final int fromX = r.left;
         final int fromY = r.top;
         child.setVisibility(INVISIBLE);
-        Runnable onCompleteRunnable = () -> child.setVisibility(VISIBLE);
+//        Runnable onCompleteRunnable = () -> child.setVisibility(VISIBLE);
+        Runnable onCompleteRunnable = new Runnable() {
+            @Override
+            public void run() {
+                child.setVisibility(VISIBLE);
+            }
+        };
         animateViewIntoPosition(dragView, fromX, fromY, toX, toY, 1, 1, 1, toScale, toScale,
                 onCompleteRunnable, ANIMATION_END_DISAPPEAR, duration, anchorView);
+
+
     }
 
     public void animateViewIntoPosition(final DragView view, final int fromX, final int fromY,

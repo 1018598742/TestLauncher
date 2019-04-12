@@ -125,7 +125,7 @@ public class PersonalWorkSlidingTabStrip extends LinearLayout implements PageInd
         float y = getHeight() - mDividerPaint.getStrokeWidth();
         canvas.drawLine(getPaddingLeft(), y, getWidth() - getPaddingRight(), y, mDividerPaint);
         canvas.drawRect(mIndicatorLeft, getHeight() - mSelectedIndicatorHeight,
-            mIndicatorRight, getHeight(), mSelectedIndicatorPaint);
+                mIndicatorRight, getHeight(), mSelectedIndicatorPaint);
     }
 
     public void highlightWorkTabIfNecessary() {
@@ -141,9 +141,17 @@ public class PersonalWorkSlidingTabStrip extends LinearLayout implements PageInd
 
     private void highlightWorkTab() {
         View v = getChildAt(POSITION_WORK);
-        v.post(() -> {
-            v.setPressed(true);
-            v.setPressed(false);
+//        v.post(() -> {
+//            v.setPressed(true);
+//            v.setPressed(false);
+//        });
+        v.post(new Runnable() {
+            @Override
+            public void run() {
+                //主线程更新 UI
+                v.setPressed(true);
+                v.setPressed(false);
+            }
         });
     }
 
@@ -167,7 +175,8 @@ public class PersonalWorkSlidingTabStrip extends LinearLayout implements PageInd
     }
 
     @Override
-    public void setMarkersCount(int numMarkers) { }
+    public void setMarkersCount(int numMarkers) {
+    }
 
     @Override
     public boolean hasOverlappingRendering() {

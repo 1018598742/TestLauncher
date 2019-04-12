@@ -23,6 +23,7 @@ import com.android.launcher3.config.FeatureFlags;
 
 /**
  * A set of utility methods for thread verification.
+ * 用于线程验证的实用方法。
  */
 public class Preconditions {
 

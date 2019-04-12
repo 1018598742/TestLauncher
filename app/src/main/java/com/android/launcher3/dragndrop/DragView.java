@@ -218,6 +218,7 @@ public class DragView extends View {
         }
         // Load the adaptive icon on a background thread and add the view in ui thread.
         final Looper workerLooper = LauncherModel.getWorkerLooper();
+        //发送消息队列到最前边
         new Handler(workerLooper).postAtFrontOfQueue(new Runnable() {
             @Override
             public void run() {

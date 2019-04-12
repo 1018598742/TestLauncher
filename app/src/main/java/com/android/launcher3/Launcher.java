@@ -277,8 +277,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         super.onCreate(savedInstanceState);
         TraceHelper.partitionSection("Launcher-onCreate", "super call");
 
+        //主线程实例 LauncherAppState
         LauncherAppState app = LauncherAppState.getInstance(this);
         mOldConfig = new Configuration(getResources().getConfiguration());
+        //Launcher 实现了 LauncherModel 中的 Callbacks 和 LauncherProviderChangeListener；此方法设置了 Callbacks 和 LauncherProviderChangeListener 的初始化
         mModel = app.setLauncher(this);
         //初始化手机固件信息
         initDeviceProfile(app.getInvariantDeviceProfile());
@@ -322,6 +324,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             currentScreen = savedInstanceState.getInt(RUNTIME_STATE_CURRENT_SCREEN, currentScreen);
         }
 
+        //开始加载数据
         if (!mModel.startLoader(currentScreen)) {
             if (!internalStateHandled) {
                 // If we are not binding synchronously, show a fade in animation when
@@ -395,6 +398,10 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         }
     }
 
+    /**
+     *
+     * @param idp 桌面布局的配置信息
+     */
     private void initDeviceProfile(InvariantDeviceProfile idp) {
         // Load configuration-specific DeviceProfile
         mDeviceProfile = idp.getDeviceProfile(this);
@@ -2144,7 +2151,13 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         mPendingExecutor = executor;
         if (!isInState(ALL_APPS)) {
             mAppsView.getAppsStore().setDeferUpdates(true);
-            mPendingExecutor.execute(() -> mAppsView.getAppsStore().setDeferUpdates(false));
+//            mPendingExecutor.execute(() -> mAppsView.getAppsStore().setDeferUpdates(false));
+            mPendingExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mAppsView.getAppsStore().setDeferUpdates(false);
+                }
+            });
         }
 
         executor.attachTo(this);

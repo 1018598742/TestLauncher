@@ -93,6 +93,7 @@ public class ViewOnDrawExecutor implements Executor, OnDrawListener, Runnable,
     @Override
     public void run() {
         // Post the pending tasks after both onDraw and onLoadAnimationCompleted have been called.
+        //在本类中通过 onDraw 和 onLoadAnimationCompleted 的 View.post 可以调用到此方法
         if (mLoadAnimationCompleted && mFirstDrawCompleted && !mCompleted) {
             runAllTasks();
         }

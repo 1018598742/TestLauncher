@@ -23,6 +23,7 @@ import com.android.launcher3.AllAppsList;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
+import com.android.launcher3.config.TagConfig;
 
 import java.util.concurrent.Executor;
 
@@ -33,7 +34,8 @@ import java.util.concurrent.Executor;
  */
 public class ModelPreload implements ModelUpdateTask {
 
-    private static final String TAG = "ModelPreload";
+//    private static final String TAG = "ModelPreload";
+    private static final String TAG = TagConfig.TAG;
 
     private LauncherAppState mApp;
     private LauncherModel mModel;
@@ -51,6 +53,7 @@ public class ModelPreload implements ModelUpdateTask {
 
     @Override
     public final void run() {
+        Log.i(TAG, "ModelPreload-run: 预加载");
         mModel.startLoaderForResultsIfNotLoaded(
                 new LoaderResults(mApp, mBgDataModel, mAllAppsList, 0, null));
         Log.d(TAG, "Preload completed : " + mModel.isModelLoaded());

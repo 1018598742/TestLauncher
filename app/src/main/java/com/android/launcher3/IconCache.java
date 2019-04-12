@@ -119,13 +119,18 @@ public class IconCache {
     public IconCache(Context context, InvariantDeviceProfile inv) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+        //单例
         mUserManager = UserManagerCompat.getInstance(mContext);
+        //单例
         mLauncherApps = LauncherAppsCompat.getInstance(mContext);
+        //与 new 相似
         mInstantAppResolver = InstantAppResolver.newInstance(mContext);
         mIconDpi = inv.fillResIconDpi;
+        //初始化 app_icons.db 数据库
         mIconDb = new IconDB(context, inv.iconBitmapSize);
-
+        //与 new 相似
         mIconProvider = IconProvider.newInstance(context);
+        //工作线程
         mWorkerHandler = new Handler(LauncherModel.getWorkerLooper());
 
         mLowResOptions = new BitmapFactory.Options();
@@ -439,9 +444,16 @@ public class IconCache {
                 } else if (info instanceof PackageItemInfo) {
                     getTitleAndIconForApp((PackageItemInfo) info, false);
                 }
-                mMainThreadExecutor.execute(() -> {
-                    caller.reapplyItemInfo(info);
-                    onEnd();
+//                mMainThreadExecutor.execute(() -> {
+//                    caller.reapplyItemInfo(info);
+//                    onEnd();
+//                });
+                mMainThreadExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        caller.reapplyItemInfo(info);
+                        onEnd();
+                    }
                 });
             }
         };

@@ -36,6 +36,7 @@ import android.util.Pair;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.PackageInstallerCompat.PackageInstallInfo;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.config.TagConfig;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.model.AddWorkspaceItemsTask;
 import com.android.launcher3.model.BaseModelUpdateTask;
@@ -78,12 +79,16 @@ import static com.android.launcher3.config.FeatureFlags.IS_DOGFOOD_BUILD;
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
  * LauncherModel object held in a static. Also provide APIs for updating the database state
  * for the Launcher.
+ * 预计只有一个对象
+ * 提供更新 launcher 状态的方法
+ * 实现的 OnAppsChangedCallbackCompat 类提供了应用安装；卸载等信息
  */
 public class LauncherModel extends BroadcastReceiver
         implements LauncherAppsCompat.OnAppsChangedCallbackCompat {
     private static final boolean DEBUG_RECEIVER = false;
 
-    static final String TAG = "Launcher.Model";
+    //    static final String TAG = "Launcher.Model";
+    static final String TAG = TagConfig.TAG;
 
     private final MainThreadExecutor mUiExecutor = new MainThreadExecutor();
     @Thunk
@@ -126,10 +131,12 @@ public class LauncherModel extends BroadcastReceiver
     /**
      * All the static data should be accessed on the background thread, A lock should be acquired
      * on this object when accessing any data from this model.
+     * 应在后台线程上访问所有静态数据。当访问此模型中的任何数据时，应在此对象上获取锁定*。
      */
     static final BgDataModel sBgDataModel = new BgDataModel();
 
     // Runnable to check if the shortcuts permission has changed.
+    //可运行以检查快捷方式权限是否已更改。
     private final Runnable mShortcutPermissionCheckRunnable = new Runnable() {
         @Override
         public void run() {
@@ -413,6 +420,7 @@ public class LauncherModel extends BroadcastReceiver
         if (DEBUG_RECEIVER) Log.d(TAG, "onReceive intent=" + intent);
 
         final String action = intent.getAction();
+        Log.i(TAG, "LauncherModel-onReceive: action="+action);
         if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
             // If we have changed locale we need to clear out the labels in all apps/workspace.
             forceReload();
@@ -480,7 +488,13 @@ public class LauncherModel extends BroadcastReceiver
             if (mCallbacks != null && mCallbacks.get() != null) {
                 final Callbacks oldCallbacks = mCallbacks.get();
                 // Clear any pending bind-runnables from the synchronized load process.
-                mUiExecutor.execute(oldCallbacks::clearPendingBinds);
+//                mUiExecutor.execute(oldCallbacks::clearPendingBinds);
+                mUiExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        oldCallbacks.clearPendingBinds();
+                    }
+                });
 
                 // If there is already one running, tell it to stop.
                 //如果已经有一个正在运行，请告诉它停止。
@@ -498,6 +512,7 @@ public class LauncherModel extends BroadcastReceiver
                     loaderResults.bindWidgets();
                     return true;
                 } else {
+                    Log.i(TAG, "LauncherModel-startLoader: 开始加载");
                     startLoaderForResults(loaderResults);
                 }
             }
@@ -716,6 +731,7 @@ public class LauncherModel extends BroadcastReceiver
     }
 
     public static void setWorkerPriority(final int priority) {
+        //设置线程优先级
         Process.setThreadPriority(sWorkerThread.getThreadId(), priority);
     }
 }

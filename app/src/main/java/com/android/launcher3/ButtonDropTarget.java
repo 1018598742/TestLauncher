@@ -16,10 +16,6 @@
 
 package com.android.launcher3;
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
-import static com.android.launcher3.LauncherState.NORMAL;
-
 import android.animation.AnimatorSet;
 import android.animation.FloatArrayEvaluator;
 import android.animation.ObjectAnimator;
@@ -49,6 +45,9 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.Target;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.Thunk;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static com.android.launcher3.LauncherState.NORMAL;
+
 /**
  * Implements a DropTarget.
  */
@@ -67,14 +66,22 @@ public abstract class ButtonDropTarget extends TextView
     private int mBottomDragPadding;
     protected DropTargetBar mDropTargetBar;
 
-    /** Whether this drop target is active for the current drag */
+    /**
+     * Whether this drop target is active for the current drag
+     */
     protected boolean mActive;
-    /** Whether an accessible drag is in progress */
+    /**
+     * Whether an accessible drag is in progress
+     */
     private boolean mAccessibleDrag;
-    /** An item must be dragged at least this many pixels before this drop target is enabled. */
+    /**
+     * An item must be dragged at least this many pixels before this drop target is enabled.
+     */
     private final int mDragDistanceThreshold;
 
-    /** The paint applied to the drag view on hover */
+    /**
+     * The paint applied to the drag view on hover
+     */
     protected int mHoverColor = 0;
 
     protected CharSequence mText;
@@ -86,7 +93,8 @@ public abstract class ButtonDropTarget extends TextView
     private int mToolTipLocation;
 
     private AnimatorSet mCurrentColorAnim;
-    @Thunk ColorMatrix mSrcFilter, mDstFilter, mCurrentFilter;
+    @Thunk
+    ColorMatrix mSrcFilter, mDstFilter, mCurrentFilter;
 
     public ButtonDropTarget(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -154,7 +162,7 @@ public abstract class ButtonDropTarget extends TextView
                 y = -getMeasuredHeight();
                 message.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
                 if (mToolTipLocation == TOOLTIP_LEFT) {
-                    x = - getMeasuredWidth() - message.getMeasuredWidth() / 2;
+                    x = -getMeasuredWidth() - message.getMeasuredWidth() / 2;
                 } else {
                     x = getMeasuredWidth() / 2 + message.getMeasuredWidth() / 2;
                 }
@@ -225,8 +233,9 @@ public abstract class ButtonDropTarget extends TextView
 
     /**
      * 开始拖动；由于之前注册了接口 addDragListener
+     *
      * @param dragObject The object being dragged
-     * @param options Options used to start the drag
+     * @param options    Options used to start the drag
      */
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
@@ -277,10 +286,19 @@ public abstract class ButtonDropTarget extends TextView
         final float scale = (float) to.width() / from.width();
         mDropTargetBar.deferOnDragEnd();
 
-        Runnable onAnimationEndRunnable = () -> {
-            completeDrop(d);
-            mDropTargetBar.onDragEnd();
-            mLauncher.getStateManager().goToState(NORMAL);
+//        Runnable onAnimationEndRunnable = () -> {
+//            completeDrop(d);
+//            mDropTargetBar.onDragEnd();
+//            mLauncher.getStateManager().goToState(NORMAL);
+//        };
+
+        Runnable onAnimationEndRunnable = new Runnable() {
+            @Override
+            public void run() {
+                completeDrop(d);
+                mDropTargetBar.onDragEnd();
+                mLauncher.getStateManager().goToState(NORMAL);
+            }
         };
 
         dragLayer.animateView(d.dragView, from, to, scale, 1f, 1f, 0.1f, 0.1f,
@@ -292,7 +310,8 @@ public abstract class ButtonDropTarget extends TextView
     public abstract int getAccessibilityAction();
 
     @Override
-    public void prepareAccessibilityDrop() { }
+    public void prepareAccessibilityDrop() {
+    }
 
     public abstract void onAccessibilityDrop(View view, ItemInfo item);
 
@@ -334,7 +353,7 @@ public abstract class ButtonDropTarget extends TextView
         }
 
         final int top = to.top + (getMeasuredHeight() - height) / 2;
-        final int bottom = top +  height;
+        final int bottom = top + height;
 
         to.set(left, top, right, bottom);
 

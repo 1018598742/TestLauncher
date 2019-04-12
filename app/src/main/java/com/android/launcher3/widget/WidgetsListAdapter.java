@@ -17,7 +17,6 @@ package com.android.launcher3.widget;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +45,7 @@ import java.util.List;
  * happens and less memory is consumed. {@link #getItemViewType} was not overridden as there is
  * only a single type of view.
  */
-public class WidgetsListAdapter extends Adapter<WidgetsRowViewHolder> {
+public class WidgetsListAdapter extends RecyclerView.Adapter<WidgetsRowViewHolder> {
 
     private static final String TAG = "WidgetsListAdapter";
     private static final boolean DEBUG = false;

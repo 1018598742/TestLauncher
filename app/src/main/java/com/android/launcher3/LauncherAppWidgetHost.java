@@ -274,7 +274,13 @@ public class LauncherAppWidgetHost extends AppWidgetHost {
     }
 
     private void sendActionCancelled(final BaseActivity activity, final int requestCode) {
-        new Handler().post(() -> activity.onActivityResult(requestCode, RESULT_CANCELED, null));
+//        new Handler().post(() -> activity.onActivityResult(requestCode, RESULT_CANCELED, null));
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                activity.onActivityResult(requestCode,RESULT_CANCELED,null);
+            }
+        });
     }
 
     /**

@@ -64,8 +64,14 @@ public class QsbWidgetHostView extends AppWidgetHostView {
             super.onLayout(changed, left, top, right, bottom);
         } catch (final RuntimeException e) {
             // Update the widget with 0 Layout id, to reset the view to error view.
-            post(() -> updateAppWidget(
-                    new RemoteViews(getAppWidgetInfo().provider.getPackageName(), 0)));
+//            post(() -> updateAppWidget(
+//                    new RemoteViews(getAppWidgetInfo().provider.getPackageName(), 0)));
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    new RemoteViews(getAppWidgetInfo().provider.getPackageName(), 0);
+                }
+            });
         }
     }
 

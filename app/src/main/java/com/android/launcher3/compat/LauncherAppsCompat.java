@@ -25,13 +25,22 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.support.annotation.Nullable;
+
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.shortcuts.ShortcutInfoCompat;
 import com.android.launcher3.util.PackageUserKey;
 import java.util.List;
 
+/**
+ * 基于 LauncherApps 服务的功能
+ */
 public abstract class LauncherAppsCompat {
 
+    /**
+     * 实现类
+     * @see LauncherModel
+     */
     public interface OnAppsChangedCallbackCompat {
         void onPackageRemoved(String packageName, UserHandle user);
         void onPackageAdded(String packageName, UserHandle user);

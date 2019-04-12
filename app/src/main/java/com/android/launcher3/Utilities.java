@@ -373,6 +373,7 @@ public final class Utilities {
         }
 
         // Just strip any sequence of whitespace or java space characters from the beginning and end
+        //只需从开头和结尾删除任何空格或java空格字符序列
         Matcher m = sTrimPattern.matcher(s);
         return m.replaceAll("$1");
     }

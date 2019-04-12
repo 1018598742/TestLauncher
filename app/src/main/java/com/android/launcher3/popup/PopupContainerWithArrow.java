@@ -275,6 +275,7 @@ public class PopupContainerWithArrow extends ArrowPopup implements DragSource,
 
         // Load the shortcuts on a background thread and update the container as it animates.
         final Looper workerLooper = LauncherModel.getWorkerLooper();
+        //发送消息到队列的最前边
         new Handler(workerLooper).postAtFrontOfQueue(PopupPopulator.createUpdateRunnable(
                 mLauncher, originalItemInfo, new Handler(Looper.getMainLooper()),
                 this, shortcutIds, mShortcuts, notificationKeys));

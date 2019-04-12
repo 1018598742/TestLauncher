@@ -90,14 +90,17 @@ public class LauncherAppState {
         mContext = context;
 
         mInvariantDeviceProfile = new InvariantDeviceProfile(mContext);
+        //初始化了 app_icons.db 数据库
         mIconCache = new IconCache(mContext, mInvariantDeviceProfile);
         mWidgetCache = new WidgetPreviewLoader(mContext, mIconCache);
+        //在 LauncherModel 中调用 LoaderTask
         mModel = new LauncherModel(this, mIconCache, AppFilter.newInstance(mContext));
 
         LauncherAppsCompat.getInstance(mContext).addOnAppsChangedCallback(mModel);
 
         // Register intent receivers
         IntentFilter filter = new IntentFilter();
+        //区域设置改变
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         // For handling managed profiles
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);

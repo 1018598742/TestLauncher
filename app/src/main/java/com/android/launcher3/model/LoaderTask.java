@@ -269,6 +269,7 @@ public class LoaderTask implements Runnable {
 
     /**
      * 加载工作空间
+     * 工作线程中
      */
     private void loadWorkspace() {
         final Context context = mApp.getContext();

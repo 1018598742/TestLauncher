@@ -4,4 +4,5 @@
     <string name="folder_name" />
 
     <string name="package_state_unknown">"未知"</string>
+    <string name="all_jobs_cancelled">所有任务取消</string>
 </resources>

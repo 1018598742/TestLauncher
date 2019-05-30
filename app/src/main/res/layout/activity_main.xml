@@ -1,68 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_height="match_parent">
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="handleXml"
-        android:onClick="handleXml"
-        android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="解析 xml Activity"
-        android:onClick="handleXmlActivity"
-        android:layout_height="wrap_content" />
+            <Button
+                android:onClick="jobTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="job测试" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="secondActivity"
-        android:onClick="secondActivity"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="handleXml"
+                android:text="handleXml" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="根据用户获取所有应用"
-        android:onClick="obtainAllApps"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="handleXmlActivity"
+                android:text="解析 xml Activity" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="通过 Uri Intent找到对应程序"
-        android:onClick="obtainIntent"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="secondActivity"
+                android:text="secondActivity" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="查看应用是否是系统的"
-        android:onClick="findSysApp"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="obtainAllApps"
+                android:text="根据用户获取所有应用" />
 
-    <EditText
-        android:id="@+id/packageEt"
-        android:hint="com.taobao.taobao"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="obtainIntent"
+                android:text="通过 Uri Intent找到对应程序" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="卸载应用"
-        android:onClick="uninstallApp"
-        android:layout_height="wrap_content" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="findSysApp"
+                android:text="查看应用是否是系统的" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:text="Log测试"
-        android:onClick="toJumpLog"
-        android:layout_height="wrap_content" />
+            <EditText
+                android:id="@+id/packageEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="com.taobao.taobao" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="uninstallApp"
+                android:text="卸载应用" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="toJumpLog"
+                android:text="Log测试" />
+
+            <Button
+                android:id="@+id/threadName1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名(使用 HandlerThread 1)" />
+
+            <Button
+                android:id="@+id/threadName2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名（使用 HandlerThread 2）" />
+
+            <Button
+                android:id="@+id/threadName3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名（直接 Thread 1）" />
+
+            <Button
+                android:id="@+id/threadName4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名(直接 Thread 2)" />
+
+            <Button
+                android:id="@+id/threadName5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名(自定义线程池 1)" />
+
+            <Button
+                android:id="@+id/threadName6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="threadName"
+                android:text="子线程名(自定义线程池 2)" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="jumpToBroad"
+                android:text="测试广播" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="jumpToPack"
+                android:text="测试包管理" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="jumpToSql"
+                android:text="数据库测试" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+
 </LinearLayout>

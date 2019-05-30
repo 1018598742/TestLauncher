@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <!-- MyProvider-onCreate:
          MyApplication-onCreate:  -->
 
@@ -27,12 +29,36 @@
         <activity android:name=".HandleXmlActivity" />
         <activity android:name=".UriIntentActivity" />
         <activity android:name=".LogActivity" />
+        <activity android:name=".BroadcastActivity" />
+        <activity android:name=".packageMan.MyPackageManageActivity" />
+        <activity android:name=".sql.SqlActivity" />
+        <activity android:name=".job.JobSchedulerAcitvity" />
+        <activity android:name=".loadapps.LoadAppAllsActivity" />
 
         <provider
             android:name=".provider.MyProvider"
             android:authorities="com.fta.skr.testmethod.provider.MyProvider"
             android:exported="false" />
 
+        <service
+            android:name=".job.JobSchedulerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <service
+            android:name=".job.MyJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver
+            android:name=".active.MdmAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+        </receiver>
     </application>
 
 </manifest>

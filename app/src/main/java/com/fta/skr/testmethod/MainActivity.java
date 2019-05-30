@@ -1,13 +1,9 @@
 package com.fta.skr.testmethod;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.LauncherActivityInfo;
-import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -15,9 +11,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Process;
-import android.os.UserHandle;
-import android.os.UserManager;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -28,6 +22,13 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+
+import com.fta.skr.testmethod.job.JobSchedulerAcitvity;
+import com.fta.skr.testmethod.loadapps.LoadAppAllsActivity;
+import com.fta.skr.testmethod.packageMan.MyPackageManageActivity;
+import com.fta.skr.testmethod.sql.SqlActivity;
+import com.fta.skr.testmethod.thread.LooperExecutor;
+import com.fta.skr.testmethod.thread.MyWorkThread;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -42,15 +43,19 @@ public class MainActivity extends AppCompatActivity {
 
     private Context mContext;
     private EditText mEt;
+    private LooperExecutor looperExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
-        testMethod(this);
+//        testMethod(this);
 
         mEt = ((EditText) findViewById(R.id.packageEt));
+
+
+        looperExecutor = new LooperExecutor(MyWorkThread.getWorkerLooper());
 
     }
 
@@ -75,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         minHeightDps = Utilities.dpiFromPx(Math.min(largestSize.x, largestSize.y), dm);
 
         Log.i(TAG, "MainActivity-testMethod: minWidthDps=" + minWidthDps + "=minHeightDps=" + minHeightDps);
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -130,40 +137,41 @@ public class MainActivity extends AppCompatActivity {
      */
     public void obtainAllApps(View view) throws PackageManager.NameNotFoundException {
         //>=17 >= 21 >=24
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            List<UserHandle> userProfiles = userManager.getUserProfiles();
-            LauncherApps launcherApps = (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            PackageManager packageManager = mContext.getPackageManager();
-            for (UserHandle user : userProfiles) {
-                List<LauncherActivityInfo> activityList = launcherApps.getActivityList(null, user);
-                if (activityList != null && !activityList.isEmpty()) {
-                    Log.i(TAG, "MainActivity-obtainAllApps: 数目：" + activityList.size());
-                    for (LauncherActivityInfo launcherActivityInfo : activityList) {
-                        ComponentName componentName = launcherActivityInfo.getComponentName();
-                        String name = launcherActivityInfo.getName();
-                        String packageName = launcherActivityInfo.getApplicationInfo().packageName;
+//        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+//            List<UserHandle> userProfiles = userManager.getUserProfiles();
+//            LauncherApps launcherApps = (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+//            PackageManager packageManager = mContext.getPackageManager();
+//            for (UserHandle user : userProfiles) {
+//                List<LauncherActivityInfo> activityList = launcherApps.getActivityList(null, user);
+//                if (activityList != null && !activityList.isEmpty()) {
+//                    Log.i(TAG, "MainActivity-obtainAllApps: 数目：" + activityList.size());
+//                    for (LauncherActivityInfo launcherActivityInfo : activityList) {
+//                        ComponentName componentName = launcherActivityInfo.getComponentName();
+//                        String name = launcherActivityInfo.getName();
+//                        String packageName = launcherActivityInfo.getApplicationInfo().packageName;
+//
+//                        boolean equals = Process.myUserHandle().equals(user);
+//                        int flags = equals ? 0 : PackageManager.GET_UNINSTALLED_PACKAGES;
+//                        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, flags);
+//                        ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+//                        CharSequence appNames = applicationInfo.loadLabel(packageManager);
+//
+//                        boolean equalUser = launcherActivityInfo.getUser().equals(user);
+//                        StringBuilder stringBuilder = new StringBuilder();
+//                        stringBuilder.append("名称：").append(appNames).append("\t启动activity名称：").append(name).append("\t包名：").append(packageName).append("\t是否这个用户：").append(equalUser);
+//                        Log.i(TAG, "MainActivity-obtainAllApps: " + stringBuilder.toString());
+//                    }
+//                }
+//            }
+//
+//            PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
+//            List<PackageInstaller.SessionInfo> allSessions = packageInstaller.getAllSessions();
+//
+//
+//        }
 
-                        boolean equals = Process.myUserHandle().equals(user);
-                        int flags = equals ? 0 : PackageManager.GET_UNINSTALLED_PACKAGES;
-                        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, flags);
-                        ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-                        CharSequence appNames = applicationInfo.loadLabel(packageManager);
-
-                        boolean equalUser = launcherActivityInfo.getUser().equals(user);
-                        StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append("名称：").append(appNames).append("\t启动activity名称：").append(name).append("\t包名：").append(packageName).append("\t是否这个用户：").append(equalUser);
-                        Log.i(TAG, "MainActivity-obtainAllApps: " + stringBuilder.toString());
-                    }
-                }
-            }
-
-            PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
-            List<PackageInstaller.SessionInfo> allSessions = packageInstaller.getAllSessions();
-
-
-        }
-
+        startActivity(new Intent(mContext, LoadAppAllsActivity.class));
     }
 
     public void handleXmlActivity(View view) {
@@ -226,6 +234,112 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void toJumpLog(View view) {
-        startActivity(new Intent(this,LogActivity.class));
+        startActivity(new Intent(this, LogActivity.class));
+    }
+
+    /**
+     * 证明使用 HandlerThread 使用的是同一个线程
+     * launcher-loader
+     * launcher-loader
+     * Thread-9
+     * Thread-10
+     * 当加入  Thread.sleep(5000) 后；依次执行 threadName1、threadName2；
+     * threadName2 的打印日志会在 threadName1 5s 后打印
+     *
+     * @param view
+     */
+    public void threadName(View view) {
+        switch (view.getId()) {
+            case R.id.threadName1:
+                Handler mWorkerHandler = new Handler(MyWorkThread.getWorkerLooper());
+                mWorkerHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        long id = Thread.currentThread().getId();
+                        Log.i(TAG, "MainActivity-run: 使用 HandlerThread 的线程名1:" + name + "=id=" + id);
+//                        try {
+//                            Thread.sleep(5000);
+//                            Log.i(TAG, "MainActivity-run: 使用 HandlerThread 的线程名 1 sleep 5s end");
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+                    }
+                });
+                break;
+            case R.id.threadName2:
+                mWorkerHandler = new Handler(MyWorkThread.getWorkerLooper());
+                mWorkerHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        long id = Thread.currentThread().getId();
+                        Log.i(TAG, "MainActivity-run: 使用 HandlerThread 的线程名2:" + name + "=id=" + id);
+                    }
+                });
+                break;
+            case R.id.threadName3:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        Log.i(TAG, "MainActivity-run: 直接 new thread 1：" + name);
+                    }
+                }).start();
+                break;
+
+            case R.id.threadName4:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        Log.i(TAG, "MainActivity-run: 直接 new thread 2：" + name);
+                    }
+                }).start();
+                break;
+
+            case R.id.threadName5:
+                looperExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        Log.i(TAG, "MainActivity-run: 自定义线程池 1：" + name);
+                        try {
+                            Thread.sleep(5000);
+                            Log.i(TAG, "MainActivity-run: 自定义线程池 1 sleep 5s end");
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                break;
+            case R.id.threadName6:
+                looperExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = Thread.currentThread().getName();
+                        Log.i(TAG, "MainActivity-run: 自定义线程池 2：" + name);
+                    }
+                });
+                break;
+        }
+    }
+
+    public void jumpToBroad(View view) {
+        startActivity(new Intent(this, BroadcastActivity.class));
+    }
+
+    public void jumpToPack(View view) {
+        startActivity(new Intent(this, MyPackageManageActivity.class));
+    }
+
+
+    public void jumpToSql(View view) {
+        SqlActivity.startSqlActivity(mContext);
+    }
+
+    public void jobTest(View view) {
+        startActivity(new Intent(this, JobSchedulerAcitvity.class));
+
     }
 }

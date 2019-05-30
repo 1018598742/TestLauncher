@@ -17,3 +17,5 @@
   - DragEvent.ACTION_DROP 释放拖放阴影，并获取移动数据
   - DragEvent.ACTION_DRAG_ENDED 拖放事件完成
 
+
+ 需要再次查看。
